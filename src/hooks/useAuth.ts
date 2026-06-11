@@ -2,7 +2,9 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
+
 import { useEffect, useState } from 'react';
+
 import { fetchCurrentUser } from '@/src/lib/auth-actions';
 
 interface DbUser {
@@ -36,25 +38,33 @@ export function useAuth() {
 
   useEffect(() => {
     if (!isSignedIn) {
-      Promise.resolve().then(() => {
-        if (dbUser !== null) setDbUser(null);
-        if (isLoadingDb) setIsLoadingDb(false);
-      });
+      setDbUser(null);
+      setIsLoadingDb(false);
       return;
     }
 
+    let isMounted = true;
     setIsLoadingDb(true);
+
     fetchCurrentUser()
       .then((data) => {
-        setDbUser(data as DbUser | null);
+        if (isMounted) {
+          setDbUser(data as DbUser | null);
+        }
       })
       .catch((err) => {
         console.error('Failed to load db user:', err);
       })
       .finally(() => {
-        setIsLoadingDb(false);
+        if (isMounted) {
+          setIsLoadingDb(false);
+        }
       });
-  }, [isSignedIn, clerkUser, dbUser, isLoadingDb]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isSignedIn, clerkUser?.id]);
 
   return {
     user: clerkUser,

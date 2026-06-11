@@ -3,12 +3,11 @@
 import { auth } from '@clerk/nextjs/server';
 
 import { CommuteMode, DietType } from '@/app/generated/prisma';
-import { calculateBaselineFootprint } from '@/lib/carbon-engine';
 import { prisma } from '@/lib/prisma';
 import { OnboardingInput, onboardingSchema } from '@/lib/validations/onboarding';
 import { getCurrentUser } from '@/src/lib/auth';
 
-export async function submitOnboarding(data: OnboardingInput) {
+export async function updateProfile(data: OnboardingInput) {
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
@@ -18,15 +17,7 @@ export async function submitOnboarding(data: OnboardingInput) {
   // Validate the data
   const parsed = onboardingSchema.parse(data);
 
-  // Calculate the baseline footprint
-  const baselineFootprint = calculateBaselineFootprint({
-    dietType: parsed.dietType,
-    commuteMode: parsed.commuteMode,
-    commuteDistance: parsed.commuteDistance,
-    monthlyKwh: parsed.monthlyKwh,
-  });
-
-  // Ensure DB user and empty profile exist via lazy creation
+  // Ensure DB user and profile exist
   const dbUser = await getCurrentUser();
   if (!dbUser) {
     throw new Error('User not found in database');
@@ -72,7 +63,7 @@ export async function submitOnboarding(data: OnboardingInput) {
       commuteMode: commuteMapping[parsed.commuteMode],
       commuteDistanceKm: parsed.commuteDistance,
       electricityUsageKwh: parsed.monthlyKwh,
-      onboardingComplete: true,
+      onboardingComplete: true, // Keep it true
     },
   });
 
@@ -98,5 +89,41 @@ export async function submitOnboarding(data: OnboardingInput) {
     },
   });
 
-  return { success: true, baselineFootprint };
+  return { success: true };
+}
+
+export async function fetchProfileAndBudget() {
+  const dbUser = await getCurrentUser();
+  if (!dbUser) {
+    throw new Error('Unauthorized');
+  }
+
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const budget = await prisma.budget.findUnique({
+    where: {
+      userId_month: {
+        userId: dbUser.id,
+        month: startOfMonth,
+      },
+    },
+  });
+
+  // Map database uppercase enums back to lowercase frontend keys
+  return {
+    name: dbUser.name || '',
+    city: dbUser.profile?.city || '',
+    state: dbUser.profile?.state || '',
+    country: dbUser.profile?.country || 'India',
+    householdSize: dbUser.profile?.householdSize || 1,
+    dietType: (dbUser.profile?.dietType?.toLowerCase() ||
+      'omnivore') as OnboardingInput['dietType'],
+    commuteMode: (dbUser.profile?.commuteMode?.toLowerCase() ||
+      'car') as OnboardingInput['commuteMode'],
+    commuteDistance: dbUser.profile?.commuteDistanceKm || 0,
+    monthlyKwh: dbUser.profile?.electricityUsageKwh || 0,
+    monthlyBudgetKg: budget?.targetKg || 500,
+  };
 }
