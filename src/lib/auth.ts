@@ -1,5 +1,7 @@
 import { auth, clerkClient } from '@clerk/nextjs/server';
+
 import { NextRequest } from 'next/server';
+
 import { prisma } from '@/lib/prisma';
 
 export async function requireAuth(_req?: NextRequest) {
@@ -24,7 +26,7 @@ export async function getCurrentUser() {
     include: { profile: true },
   });
 
-  // If the user doesn't exist in our DB yet, we create them lazily
+  // If the user doesn't exist in our DB yet, check email fallback or create them lazily
   if (!dbUser) {
     const client = await clerkClient();
     const clerkUser = await client.users.getUser(clerkId);
@@ -35,19 +37,48 @@ export async function getCurrentUser() {
       throw new Error('User has no email address');
     }
 
-    dbUser = await prisma.user.create({
-      data: {
-        clerkId,
-        email,
-        name,
-        profile: {
-          create: {},
+    // Check if the user exists by email (e.g. if the clerkId changed)
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      include: { profile: true },
+    });
+
+    if (existingUser) {
+      // Link the existing user record to the new clerkId
+      dbUser = await prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          clerkId,
+          name: name || existingUser.name,
         },
-      },
-      include: {
-        profile: true,
+        include: { profile: true },
+      });
+    } else {
+      // Create new user and profile
+      dbUser = await prisma.user.create({
+        data: {
+          clerkId,
+          email,
+          name,
+          profile: {
+            create: {},
+          },
+        },
+        include: {
+          profile: true,
+        },
+      });
+    }
+  }
+
+  // Ensure a Profile record exists for the user
+  if (dbUser && !dbUser.profile) {
+    const profile = await prisma.profile.create({
+      data: {
+        userId: dbUser.id,
       },
     });
+    dbUser.profile = profile;
   }
 
   return dbUser;
