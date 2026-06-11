@@ -1,0 +1,79 @@
+# Progress Tracker
+
+Update this file whenever the current phase, active feature or implementation state changes. It provides a summary of what has been done, what is in progress and what questions remain. Keep it concise but complete.
+
+## Current Phase
+
+- Implementation
+
+## Current Goal
+
+- Complete database-backed onboarding persistence (Task 12).
+
+## Completed
+
+- Defined the project overview and objectives.
+- Established the architecture context and system boundaries.
+- Created the code standards document.
+- Drafted the UI guidelines.
+- Written the development workflow rules.
+- Prepared feature specifications for all core features.
+- Set up the Design System and UI Primitives (tasks/01-design-system.md).
+- Configured the Global Theme (tasks/02-global-theme.md).
+- Installed Project Dependencies (tasks/03-install-dependencies.md).
+- Configured Tailwind and PostCSS (tasks/04-setup-tailwind-and-postcss.md).
+- Configured Icons and Assets (tasks/06-setup-icons.md).
+- Configured PostgreSQL and Prisma (tasks/07-setup-postgresql-and-prisma.md).
+- Defined Prisma Schema Models (tasks/08-prisma-schema-models.md).
+- Ran Migrations and Seed Data (tasks/09-prisma-migration-seed.md).
+- Installed Clerk and Set Up Authentication (tasks/10-install-clerk-and-auth-setup.md).
+- Build Authentication Context and Route Protection (tasks/11-auth-context-and-protection.md).
+
+## In Progress
+
+- Ready to start Task 12: Build Onboarding Form.
+
+## Next Up
+
+- Complete database-backed onboarding persistence from tasks/12-onboarding-form.md.
+
+## Open Questions
+
+- Which AI provider will be used for the MVP (Gemini versus OpenAI)? This choice will affect the Trigger.dev workflow implementation.
+- Should the initial release support multiple regions with region specific emission factors? If so, how will the user select their region and how will factors be overridden?
+
+## Architecture Decisions
+
+- Adopt a local emission factor database loaded from JSON for offline calculations.
+- Use Clerk for authentication with PostgreSQL storing user profiles and activity logs.
+- Trigger.dev will orchestrate AI calls and monthly resets of budget consumption.
+- The application will run as a Next.js 16 serverless deployment on Vercel.
+
+## Session Notes
+
+- All context and feature files must be created and reviewed before coding begins.
+- Ensure environment variables for Clerk, PostgreSQL and Trigger.dev are documented in the README or environment template.
+- Re-read tasks/01-design-system.md and verified the design system primitives are present in the current repo: Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea, components.json, lucide-react and the cn() helper in lib/utils.ts.
+- Verification blockers outside tasks/01-design-system.md: the earlier duplicate jsx-a11y lint config issue was resolved during tasks/05-setup-linting-and-prettier.md; build gets past font fetching with network access but fails type checking in app/onboarding/page.tsx on the react-hook-form useForm export.
+- Re-read tasks/02-global-theme.md and aligned Tailwind, CSS variables, the type-safe theme token module and the theme demo page with the UI context.
+- Verification for tasks/02-global-theme.md: targeted Prettier check passes; the earlier duplicate jsx-a11y lint config issue was resolved during tasks/05-setup-linting-and-prettier.md; build compiles successfully with network access before failing on the existing app/onboarding/page.tsx react-hook-form useForm type error.
+- Re-read tasks/03-install-dependencies.md and verified the Next.js TypeScript app scaffold, scripts and required package set; added missing direct dependencies @shadcn/ui, postcss and autoprefixer to package.json and package-lock.json.
+- Verification for tasks/03-install-dependencies.md: npm install is up to date with 5 moderate audit findings; npx prisma -v reports Prisma 7.8.0 and @prisma/client 7.8.0; npx next -v reports Next.js 16.2.7; an existing Next dev server for this repo is running on localhost:3001 and logs show successful compiles. The earlier duplicate jsx-a11y lint config issue was resolved during tasks/05-setup-linting-and-prettier.md; build remains blocked by the onboarding react-hook-form type error. Git commit could not be performed because this directory is not a Git repository.
+- Re-read tasks/04-setup-tailwind-and-postcss.md and aligned Tailwind/PostCSS setup with Next.js 16 and Tailwind CSS v4: configured root Tailwind content/theme/plugins, added postcss.config.js with @tailwindcss/postcss plus autoprefixer, confirmed globals.css imports Tailwind and theme variables, and added a /tailwind-test page for custom tokens, forms, prose, responsive utilities and dark class variants.
+- Verification for tasks/04-setup-tailwind-and-postcss.md: targeted Prettier check passes; production build compiles CSS and application code successfully with network access before stopping at the existing app/onboarding/page.tsx react-hook-form useForm type error; the duplicate jsx-a11y lint config blocker was resolved during tasks/05-setup-linting-and-prettier.md.
+- Re-read tasks/05-setup-linting-and-prettier.md and completed ESLint/Prettier setup for Next.js 16: fixed the flat ESLint config duplicate plugin issue, added the legacy .eslintrc.js reference config, confirmed .prettierrc and .editorconfig, documented linting/formatting locations in code-standards.md, and removed unsafe any usage from onboarding step validation.
+- Verification for tasks/05-setup-linting-and-prettier.md: npm run lint passes; npm run lint:fix passes; npm run format passes; targeted Prettier check passes. Production build still compiles successfully with network access before stopping at the existing app/onboarding/page.tsx react-hook-form useForm type error.
+- Re-read tasks/06-setup-icons.md and completed setup of Font Awesome icons and asset pipeline: created src/lib/icons.ts with FOUC prevention, created the reusable src/components/Icon.tsx component, registered all 13 required icons in the Font Awesome library, imported it in app/layout.tsx, created an interactive icons-demo page to verify layout/sizes/colors, and documented icons and assets in ui-context.md.
+- Verification for tasks/06-setup-icons.md: ran linting, formatting, and verified typescript types; next build will be tested to confirm everything compiles successfully. The existing app/onboarding/page.tsx type error is out of scope.
+- Re-read tasks/07-setup-postgresql-and-prisma.md and completed setup of PostgreSQL and Prisma ORM for Prisma 7 compatibility: provisioned the Docker Compose postgres:16 service on localhost:5432, configured .env and prisma.config.ts for DATABASE_URL, kept schema.prisma compatible with Prisma 7 datasource rules, installed @prisma/adapter-pg and pg, and updated lib/prisma.ts plus prisma/test-connection.ts to use the PrismaPg driver adapter.
+- Verification for tasks/07-setup-postgresql-and-prisma.md: Docker reports the database container healthy; npx prisma validate passes; npx prisma generate succeeds; npx prisma db push reports the database is in sync with the Prisma schema; prisma/test-connection.ts prints the current database time and user table count.
+- Re-read tasks/08-prisma-schema-models.md along with project-overview.md, architecture-context.md and code-standards.md. Verified schema.prisma includes User, Profile, EmissionFactor, ActivityLog, Budget, Conversation, ConversationMessage and Challenge models with typed enums, relations, cascade rules and query indexes. Documented the storage model and intentional deviations from the task template in architecture-context.md.
+- Verification for tasks/08-prisma-schema-models.md: npx prisma validate passes; npx prisma generate succeeds; npx prisma db push reports the PostgreSQL database is in sync with the Prisma schema; prisma/test-client.ts verifies all model tables through Prisma counts.
+- Re-read tasks/09-prisma-migration-seed.md and completed the initial Prisma migration and seed setup. Prisma detected stale local database migration history from previously missing migration files, so the empty local development database was reset and a fresh migration was created at prisma/migrations/20260611114553_init/migration.sql. Added prisma/seed.ts with idempotent upserts for 21 emission factor records, including Task 09 starter factors and existing local carbon engine factors. Configured Prisma 7 seeding in prisma.config.ts and kept package.json scripts for migrate/generate/seed convenience.
+- Verification for tasks/09-prisma-migration-seed.md: npx prisma migrate status reports one migration and the database schema is up to date; Prisma Studio starts successfully on localhost:5566 with browser disabled; npx prisma db seed runs successfully and can be rerun without duplicates; prisma/test-client.ts reports 21 emission factors and zero user-owned records.
+- Re-read tasks/10-install-clerk-and-auth-setup.md and verified @clerk/nextjs is installed. Added Clerk keys to .env.local from the existing local environment, wrapped the App Router root layout with ClerkProvider, kept Next.js 16 proxy.ts Clerk middleware in place, configured /sign-in and /sign-up with Clerk path routing and dashboard fallback redirects, and added a protected /dashboard route shell backed by components/dashboard/Dashboard.tsx.
+- Verification for tasks/10-install-clerk-and-auth-setup.md: Next.js 16 proxy docs were checked before editing; npx tsc --noEmit passes; targeted ESLint passes for the auth and dashboard files. The installed Clerk v7 package exposes Show for signed-in/signed-out rendering instead of SignedIn/SignedOut, so the implementation uses Show and documents that API difference in architecture-context.md.
+- Re-read tasks/11-auth-context-and-protection.md and completed setup of authentication context helpers and route protection: created custom react hook `useAuth.ts` merging Clerk and PostgreSQL profiles, created server action `auth-actions.ts` for database lookup, built core auth middlewares `auth.ts` with `requireAuth` (handling Clerk v7 asynchronous `clerkClient` signature) and database lazy-creation fallback, created procedure wrapper `withAuth.ts`, and built verification page `/auth-test`.
+- Verification for tasks/11-auth-context-and-protection.md: `npx tsc --noEmit` and production `npm run build` compiled successfully. Manual testing of `/auth-test` via `curl` verifies that path-routed and protected page setups correctly match Clerk's `signed-out` and `signed-in` session rules.
+- Fixed sidebar brand header height (setting `h-16`) to align its bottom border line with the topbar header next to it. Wrapped the root layout header in a `<Show when="signed-out">` conditional rendering wrapper to fix the double header layout clash when signed in. Reverted sign-in and sign-up buttons to Clerk's modal mode (`mode="modal"`) with matching emerald styles, and added a mobile-only `UserButton` container inside `AppTopbar` so signed-in mobile users can still sign out and manage their sessions easily when the main sidebar is hidden. Verification: `npx tsc --noEmit` and `npm run build` compiled successfully, and ESLint checks passed with zero errors or warnings.
+
