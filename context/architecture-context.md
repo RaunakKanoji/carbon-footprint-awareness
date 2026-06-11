@@ -59,9 +59,9 @@ Authorisation checks occur in API routes and server actions. Helpers in `lib/aut
 
 ## Carbon Engine
 
-The carbon engine is a collection of pure functions located in `lib/carbon-engine.ts` backed by a static emission factor database (JSON) in `data/emission-factors.json`. It exposes calculation functions for each activity category as well as aggregation helpers. Calculation functions accept primitive inputs (distance, kWh, servings, etc.), look up the appropriate emission factor and return a numeric CO2e value in kilograms. These functions do not perform I/O and can run on both the client (for optimistic updates) and the server (for authoritative calculations).
+The carbon engine is located in `lib/carbon-engine.ts` and uses database-backed lookup tables (loaded into an in-memory cache at runtime) to convert quantity logs into estimated CO₂e emissions.
 
-Emission factors are separated from code to allow future regional overrides or updates without redeploying business logic. An environment variable can point to an alternate JSON file for regional factors.
+Emission factors are managed in the database (with defaults seeded from UK Government GHG factors and India grid CEA factors), supporting custom updates or regional overrides without modifying application code.
 
 ## AI Workflow
 
