@@ -39,10 +39,13 @@ Carbon Compass AI is an AI‑powered carbon footprint awareness platform design
 
 ### Carbon engine & emission factor database
 
-- A library of emission factors for common activities stored in a JSON file and imported at runtime.
+- A library of emission factors for common activities stored in a database (with in-memory cache) and loaded at runtime.
 - Functions to calculate emissions for transport, electricity, food, shopping, waste and flights.
 - Aggregation helpers to calculate daily, weekly and monthly totals as well as category breakdowns.
 - Support for custom emission factors through environment configuration to accommodate regional differences.
+- **Emission Factor Sources**: Emission factors are sourced from trusted institutions, specifically:
+  - **Transport, Food, Waste, and Shopping**: Seeded using factors matching the UK Government Greenhouse Gas (GHG) Conversion Factors for Company Reporting.
+  - **Electricity (Indian Grid)**: Seeded using Central Electricity Authority (CEA) of India conversion factor (0.71 kg CO₂e per kWh).
 
 ### Activity logging
 
