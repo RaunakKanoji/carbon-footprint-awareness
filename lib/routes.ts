@@ -14,4 +14,4 @@ export const routes = {
 } as const;
 
 export type RouteKeys = keyof typeof routes;
-export type RouteValues = (typeof routes)[RouteKeys];
+export type RouteValues = typeof routes[RouteKeys];

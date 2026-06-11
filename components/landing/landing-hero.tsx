@@ -1,7 +1,5 @@
-import { ArrowRight, Leaf, Play } from 'lucide-react';
-
 import Link from 'next/link';
-
+import { ArrowRight, Leaf, Play } from 'lucide-react';
 import { routes } from '@/lib/routes';
 
 export default function LandingHero() {
@@ -27,8 +25,7 @@ export default function LandingHero() {
 
         {/* Description */}
         <p className="w-full max-w-2xl text-base sm:text-xl text-text-secondary leading-relaxed font-normal">
-          Track daily activities, understand your emissions, and discover simple, high-impact ways
-          to reduce your environmental impact.
+          Track daily activities, understand your emissions, and discover simple, high-impact ways to reduce your environmental impact.
         </p>
 
         {/* Call to Actions */}

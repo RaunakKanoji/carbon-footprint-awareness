@@ -4,14 +4,12 @@
     "vegetarian": 60,
     "pescatarian": 75,
     "omnivore": 105,
-    "mixed": 90,
     "heavy-meat": 135
   },
   "commute": {
     "car": 0.2,
     "motorcycle": 0.1,
     "public-transit": 0.05,
-    "metro": 0.03,
     "bicycle": 0,
     "walking": 0,
     "remote": 0

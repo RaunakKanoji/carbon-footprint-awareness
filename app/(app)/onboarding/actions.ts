@@ -2,11 +2,8 @@
 
 import { auth } from '@clerk/nextjs/server';
 
-import { CommuteMode, DietType } from '@/app/generated/prisma';
 import { calculateBaselineFootprint } from '@/lib/carbon-engine';
-import { prisma } from '@/lib/prisma';
 import { OnboardingInput, onboardingSchema } from '@/lib/validations/onboarding';
-import { getCurrentUser } from '@/src/lib/auth';
 
 export async function submitOnboarding(data: OnboardingInput) {
   const { userId: clerkId } = await auth();
@@ -26,77 +23,8 @@ export async function submitOnboarding(data: OnboardingInput) {
     monthlyKwh: parsed.monthlyKwh,
   });
 
-  // Ensure DB user and empty profile exist via lazy creation
-  const dbUser = await getCurrentUser();
-  if (!dbUser) {
-    throw new Error('User not found in database');
-  }
-
-  // Update user name in DB if provided
-  if (parsed.name) {
-    await prisma.user.update({
-      where: { id: dbUser.id },
-      data: { name: parsed.name },
-    });
-  }
-
-  // Map onboarding input enums to Prisma schema enums
-  const dietMapping: Record<string, DietType> = {
-    vegan: DietType.VEGAN,
-    vegetarian: DietType.VEGETARIAN,
-    pescatarian: DietType.PESCATARIAN,
-    omnivore: DietType.OMNIVORE,
-    mixed: DietType.MIXED,
-    'heavy-meat': DietType.OTHER,
-  };
-
-  const commuteMapping: Record<string, CommuteMode> = {
-    car: CommuteMode.CAR,
-    motorcycle: CommuteMode.MOTORBIKE,
-    'public-transit': CommuteMode.BUS,
-    metro: CommuteMode.METRO,
-    bicycle: CommuteMode.BICYCLE,
-    walking: CommuteMode.WALK,
-    remote: CommuteMode.WORK_FROM_HOME,
-  };
-
-  // Update profile database record
-  await prisma.profile.update({
-    where: { userId: dbUser.id },
-    data: {
-      city: parsed.city,
-      state: parsed.state,
-      country: parsed.country,
-      householdSize: parsed.householdSize,
-      dietType: dietMapping[parsed.dietType],
-      commuteMode: commuteMapping[parsed.commuteMode],
-      commuteDistanceKm: parsed.commuteDistance,
-      electricityUsageKwh: parsed.monthlyKwh,
-      onboardingComplete: true,
-    },
-  });
-
-  // Upsert a monthly carbon budget record for the current month
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-
-  await prisma.budget.upsert({
-    where: {
-      userId_month: {
-        userId: dbUser.id,
-        month: startOfMonth,
-      },
-    },
-    update: {
-      targetKg: parsed.monthlyBudgetKg,
-    },
-    create: {
-      userId: dbUser.id,
-      month: startOfMonth,
-      targetKg: parsed.monthlyBudgetKg,
-    },
-  });
+  // Ignoring Prisma for now
+  console.log('Skipping Prisma save for user:', clerkId);
 
   return { success: true, baselineFootprint };
 }

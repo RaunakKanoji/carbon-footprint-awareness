@@ -25,21 +25,21 @@ Most people know climate change matters, but they do not know which daily habits
 - **Insights & Analytics Dashboard**: Clean charts and trends to monitor reduction streaks and historical averages.
 - **Habit-Building Challenges**: Gamified reduction milestones (e.g., "Meat-free Week" or "Cycle to Work") to encourage positive behaviors.
 
-_Note: Some advanced features may be in progress depending on the current development stage of the roadmap._
+*Note: Some advanced features may be in progress depending on the current development stage of the roadmap.*
 
 ## Tech Stack
 
-| Component           | Technology                                                                                                           | Description                                                   |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------ |
-| **Frontend**        | [Next.js](https://nextjs.org) (App Router), [React](https://react.dev), [TypeScript](https://www.typescriptlang.org) | Core application layer and interactive views                  |
-| **Styling**         | [Tailwind CSS](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com)                                          | Consistent CSS utility tokens and components                  |
-| **Authentication**  | [Clerk](https://clerk.com)                                                                                           | User session verification, sign-in, and onboarding states     |
-| **Database**        | [PostgreSQL](https://www.postgresql.org), [Prisma ORM](https://www.prisma.io)                                        | Relational database modeling, query layer, and driver adapter |
-| **Background Jobs** | [Trigger.dev](https://trigger.dev)                                                                                   | Scheduled jobs (e.g. monthly resets) and async AI tasks       |
-| **AI Integration**  | Gemini API or OpenAI API                                                                                             | Context-aware carbon engine chat agent and suggestions        |
-| **Charts**          | [Recharts](https://recharts.org)                                                                                     | Responsive and accessible SVG data visualizations             |
-| **Code Review**     | CodeRabbit                                                                                                           | Automated repository checks and styling audit                 |
-| **Deployment**      | [Vercel](https://vercel.com)                                                                                         | Production serverless hosting                                 |
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend** | [Next.js](https://nextjs.org) (App Router), [React](https://react.dev), [TypeScript](https://www.typescriptlang.org) | Core application layer and interactive views |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com) | Consistent CSS utility tokens and components |
+| **Authentication** | [Clerk](https://clerk.com) | User session verification, sign-in, and onboarding states |
+| **Database** | [PostgreSQL](https://www.postgresql.org), [Prisma ORM](https://www.prisma.io) | Relational database modeling, query layer, and driver adapter |
+| **Background Jobs** | [Trigger.dev](https://trigger.dev) | Scheduled jobs (e.g. monthly resets) and async AI tasks |
+| **AI Integration** | Gemini API or OpenAI API | Context-aware carbon engine chat agent and suggestions |
+| **Charts** | [Recharts](https://recharts.org) | Responsive and accessible SVG data visualizations |
+| **Code Review** | CodeRabbit | Automated repository checks and styling audit |
+| **Deployment** | [Vercel](https://vercel.com) | Production serverless hosting |
 
 ## App Structure
 

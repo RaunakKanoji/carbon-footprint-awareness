@@ -1,9 +1,8 @@
 'use client';
 
 import { ComponentProps } from 'react';
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/src/components/Icon';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ICONS_LIST = [
   { name: 'car', icon: 'car', category: 'Transport', desc: 'Personal vehicle emissions' },
@@ -11,26 +10,11 @@ const ICONS_LIST = [
   { name: 'bicycle', icon: 'bicycle', category: 'Transport', desc: 'Active travel & cycling' },
   { name: 'utensils', icon: 'utensils', category: 'Food & Diet', desc: 'Meals and food choices' },
   { name: 'bolt', icon: 'bolt', category: 'Energy', desc: 'Electricity and power usage' },
-  {
-    name: 'shopping-bag',
-    icon: 'shopping-bag',
-    category: 'Consumption',
-    desc: 'Purchased goods and shopping',
-  },
+  { name: 'shopping-bag', icon: 'shopping-bag', category: 'Consumption', desc: 'Purchased goods and shopping' },
   { name: 'trash', icon: 'trash', category: 'Waste', desc: 'Waste production and recycling' },
-  {
-    name: 'chart-pie',
-    icon: 'chart-pie',
-    category: 'Analytics',
-    desc: 'Emissions breakdown charts',
-  },
+  { name: 'chart-pie', icon: 'chart-pie', category: 'Analytics', desc: 'Emissions breakdown charts' },
   { name: 'leaf', icon: 'leaf', category: 'Eco', desc: 'Environmental awareness & green actions' },
-  {
-    name: 'person-running',
-    icon: 'person-running',
-    category: 'Eco',
-    desc: 'Low-carbon activities',
-  },
+  { name: 'person-running', icon: 'person-running', category: 'Eco', desc: 'Low-carbon activities' },
   { name: 'tree', icon: 'tree', category: 'Eco', desc: 'Offsetting & carbon sequestration' },
   { name: 'user', icon: 'user', category: 'Profile', desc: 'User accounts and personal stats' },
   { name: 'couch', icon: 'couch', category: 'Energy', desc: 'Home appliances & comfort footprint' },

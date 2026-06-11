@@ -1,12 +1,10 @@
 'use client';
 
-import { UserButton } from '@clerk/nextjs';
-import * as Icons from 'lucide-react';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
+import * as Icons from 'lucide-react';
 import { sidebarNavigation } from '@/lib/navigation';
+import { UserButton } from '@clerk/nextjs';
 
 export default function AppSidebar() {
   const pathname = usePathname();
@@ -25,8 +23,7 @@ export default function AppSidebar() {
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {sidebarNavigation.map((item) => {
           // Resolve the Lucide icon dynamically
-          const LucideIcon = (Icons[item.iconName as keyof typeof Icons] ||
-            Icons.HelpCircle) as React.ComponentType<{ className?: string }>;
+          const LucideIcon = (Icons[item.iconName as keyof typeof Icons] || Icons.HelpCircle) as React.ComponentType<{ className?: string }>;
           const isActive = pathname === item.href;
 
           return (

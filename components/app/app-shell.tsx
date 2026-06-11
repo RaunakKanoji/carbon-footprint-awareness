@@ -1,5 +1,4 @@
 import React from 'react';
-
 import AppSidebar from './app-sidebar';
 import AppTopbar from './app-topbar';
 import MobileBottomNav from './mobile-bottom-nav';
@@ -19,10 +18,12 @@ export default function AppShell({ children }: AppShellProps) {
       {/* Main Layout Area */}
       <div className="flex flex-col flex-1 h-full overflow-hidden min-w-0">
         <AppTopbar />
-
+        
         {/* Scrollable Page Content */}
         <main className="flex-1 overflow-y-auto p-6 pb-24 md:pb-6">
-          <div className="w-full max-w-5xl mx-auto space-y-6">{children}</div>
+          <div className="w-full max-w-5xl mx-auto space-y-6">
+            {children}
+          </div>
         </main>
       </div>
 

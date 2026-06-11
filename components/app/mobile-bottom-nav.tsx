@@ -1,10 +1,8 @@
 'use client';
 
-import * as Icons from 'lucide-react';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
+import * as Icons from 'lucide-react';
 import { mobileNavigation } from '@/lib/navigation';
 
 export default function MobileBottomNav() {
@@ -13,8 +11,7 @@ export default function MobileBottomNav() {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface border-t border-border-default flex justify-around py-2 px-4 z-50">
       {mobileNavigation.map((item) => {
-        const LucideIcon = (Icons[item.iconName as keyof typeof Icons] ||
-          Icons.HelpCircle) as React.ComponentType<{ className?: string }>;
+        const LucideIcon = (Icons[item.iconName as keyof typeof Icons] || Icons.HelpCircle) as React.ComponentType<{ className?: string }>;
         const isActive = pathname === item.href;
 
         return (

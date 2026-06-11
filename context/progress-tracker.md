@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature or implementation st
 
 ## Current Goal
 
-- Implement Carbon Calculation Engine (Task 14).
+- Complete database-backed onboarding persistence (Task 12).
 
 ## Completed
 
@@ -28,16 +28,14 @@ Update this file whenever the current phase, active feature or implementation st
 - Ran Migrations and Seed Data (tasks/09-prisma-migration-seed.md).
 - Installed Clerk and Set Up Authentication (tasks/10-install-clerk-and-auth-setup.md).
 - Build Authentication Context and Route Protection (tasks/11-auth-context-and-protection.md).
-- Build Onboarding Form and Redirect Guard (tasks/12-onboarding-form.md).
-- Create User Profile Page (tasks/13-user-profile-page.md).
 
 ## In Progress
 
-- Ready to start Task 14: Carbon Engine Setup.
+- Ready to start Task 12: Build Onboarding Form.
 
 ## Next Up
 
-- Implement Activity Categories (tasks/15-activity-categories.md).
+- Complete database-backed onboarding persistence from tasks/12-onboarding-form.md.
 
 ## Open Questions
 
@@ -78,4 +76,4 @@ Update this file whenever the current phase, active feature or implementation st
 - Re-read tasks/11-auth-context-and-protection.md and completed setup of authentication context helpers and route protection: created custom react hook `useAuth.ts` merging Clerk and PostgreSQL profiles, created server action `auth-actions.ts` for database lookup, built core auth middlewares `auth.ts` with `requireAuth` (handling Clerk v7 asynchronous `clerkClient` signature) and database lazy-creation fallback, created procedure wrapper `withAuth.ts`, and built verification page `/auth-test`.
 - Verification for tasks/11-auth-context-and-protection.md: `npx tsc --noEmit` and production `npm run build` compiled successfully. Manual testing of `/auth-test` via `curl` verifies that path-routed and protected page setups correctly match Clerk's `signed-out` and `signed-in` session rules.
 - Fixed sidebar brand header height (setting `h-16`) to align its bottom border line with the topbar header next to it. Wrapped the root layout header in a `<Show when="signed-out">` conditional rendering wrapper to fix the double header layout clash when signed in. Reverted sign-in and sign-up buttons to Clerk's modal mode (`mode="modal"`) with matching emerald styles, and added a mobile-only `UserButton` container inside `AppTopbar` so signed-in mobile users can still sign out and manage their sessions easily when the main sidebar is hidden. Verification: `npx tsc --noEmit` and `npm run build` compiled successfully, and ESLint checks passed with zero errors or warnings.
-- Re-read tasks/13-user-profile-page.md and completed implementation of the User Profile management page. Integrated the Clerk account settings triggers, grouped profile preferences into tabbed settings sections (General & Location, Transit & Utilities, Lifestyle & Budget), and implemented real-time baseline footprint calculations on the client side with a complete visual breakdown. Verified TypeScript type checks, ESLint rules, and Next.js production builds compile successfully.
+
