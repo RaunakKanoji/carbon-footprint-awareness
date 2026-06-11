@@ -1,0 +1,215 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ActivityCategory {
+  TRANSPORT
+  FOOD
+  ENERGY
+  SHOPPING
+  WASTE
+  OFFSET
+  OTHER
+}
+
+enum DietType {
+  VEGAN
+  VEGETARIAN
+  PESCATARIAN
+  MIXED
+  OMNIVORE
+  OTHER
+}
+
+enum CommuteMode {
+  WALK
+  BICYCLE
+  METRO
+  BUS
+  TRAIN
+  CAR
+  MOTORBIKE
+  EV
+  CARPOOL
+  WORK_FROM_HOME
+  OTHER
+}
+
+enum ConversationRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum ChallengeStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  clerkId       String   @unique
+  email         String   @unique
+  name          String?
+
+  profile       Profile?
+  activities    ActivityLog[]
+  budgets       Budget[]
+  conversations Conversation[]
+  challenges    Challenge[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Profile {
+  id                    String       @id @default(cuid())
+  userId                String       @unique
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  city                  String?
+  state                 String?
+  country               String?
+  householdSize          Int?
+
+  dietType              DietType?
+  commuteMode           CommuteMode?
+  commuteDistanceKm      Float?
+  electricityUsageKwh    Float?
+
+  onboardingComplete     Boolean      @default(false)
+
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+}
+
+model EmissionFactor {
+  id          String           @id @default(cuid())
+
+  category    ActivityCategory
+  subType     String
+  unit        String
+  factor      Float
+  description String?
+  source      String?
+  region      String?
+  isActive    Boolean          @default(true)
+
+  activities  ActivityLog[]
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([category, subType, unit, region])
+  @@index([category])
+  @@index([subType])
+}
+
+model ActivityLog {
+  id               String           @id @default(cuid())
+
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  emissionFactorId String?
+  emissionFactor   EmissionFactor?  @relation(fields: [emissionFactorId], references: [id], onDelete: SetNull)
+
+  category         ActivityCategory
+  subType          String
+  quantity         Float
+  unit             String
+
+  factorUsed       Float?
+  co2eKg           Float
+
+  note             String?
+  occurredAt       DateTime         @default(now())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([userId, occurredAt])
+  @@index([userId, category])
+  @@index([category, subType])
+}
+
+model Budget {
+  id        String   @id @default(cuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  month     DateTime
+  targetKg  Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, month])
+  @@index([userId, month])
+}
+
+model Conversation {
+  id        String                @id @default(cuid())
+
+  userId    String
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title     String?
+  summary   String?
+  metadata  Json?
+
+  messages  ConversationMessage[]
+
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  @@index([userId, updatedAt])
+}
+
+model ConversationMessage {
+  id             String           @id @default(cuid())
+
+  conversationId String
+  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role           ConversationRole
+  content        String
+  metadata       Json?
+
+  createdAt      DateTime         @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model Challenge {
+  id          String          @id @default(cuid())
+
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  category    ActivityCategory?
+  targetCo2eKg Float?
+  status      ChallengeStatus @default(ACTIVE)
+
+  startedAt   DateTime        @default(now())
+  completedAt DateTime?
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([userId, status])
+  @@index([category])
+}
