@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature or implementation st
 
 ## Current Goal
 
-- Implement Carbon Calculation Engine (Task 14).
+- Implement Activity Categories (Task 15).
 
 ## Completed
 
@@ -30,14 +30,15 @@ Update this file whenever the current phase, active feature or implementation st
 - Build Authentication Context and Route Protection (tasks/11-auth-context-and-protection.md).
 - Build Onboarding Form and Redirect Guard (tasks/12-onboarding-form.md).
 - Create User Profile Page (tasks/13-user-profile-page.md).
+- Implement Carbon Calculation Engine (tasks/14-carbon-engine-setup.md).
 
 ## In Progress
 
-- Ready to start Task 14: Carbon Engine Setup.
+- Ready to start Task 15: Implement Activity Categories.
 
 ## Next Up
 
-- Implement Activity Categories (tasks/15-activity-categories.md).
+- Implement Activity Logging Forms (tasks/16-activity-logging-forms.md).
 
 ## Open Questions
 
@@ -79,3 +80,4 @@ Update this file whenever the current phase, active feature or implementation st
 - Verification for tasks/11-auth-context-and-protection.md: `npx tsc --noEmit` and production `npm run build` compiled successfully. Manual testing of `/auth-test` via `curl` verifies that path-routed and protected page setups correctly match Clerk's `signed-out` and `signed-in` session rules.
 - Fixed sidebar brand header height (setting `h-16`) to align its bottom border line with the topbar header next to it. Wrapped the root layout header in a `<Show when="signed-out">` conditional rendering wrapper to fix the double header layout clash when signed in. Reverted sign-in and sign-up buttons to Clerk's modal mode (`mode="modal"`) with matching emerald styles, and added a mobile-only `UserButton` container inside `AppTopbar` so signed-in mobile users can still sign out and manage their sessions easily when the main sidebar is hidden. Verification: `npx tsc --noEmit` and `npm run build` compiled successfully, and ESLint checks passed with zero errors or warnings.
 - Re-read tasks/13-user-profile-page.md and completed implementation of the User Profile management page. Integrated the Clerk account settings triggers, grouped profile preferences into tabbed settings sections (General & Location, Transit & Utilities, Lifestyle & Budget), and implemented real-time baseline footprint calculations on the client side with a complete visual breakdown. Verified TypeScript type checks, ESLint rules, and Next.js production builds compile successfully.
+- Re-read tasks/14-carbon-engine-setup.md and implemented the database-backed Carbon Calculation Engine. Added factor loading with in-memory caching in `lib/carbon-engine.ts`, input quantity and category validations, generic `calculateCo2e` lookup, specific category helper wrappers, and period-based aggregation (`sumActivitiesByCategory`). Created standard Vitest unit tests in `lib/carbon-engine.test.ts` covering 10 assertion cases and verified that all tests, linter configurations, and production builds compile successfully.
