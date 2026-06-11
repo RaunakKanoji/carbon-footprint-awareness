@@ -69,6 +69,15 @@ These standards establish consistent practices across the Carbon Compass AI code
 - Use integration tests for API routes to verify validation, authentication and persistence. Spin up a test database for these tests.
 - Mock external services (for example AI providers) in tests to ensure determinism and avoid network calls.
 
+## Carbon Calculation Engine
+
+- All emission factor calculation functions and utilities must live in `lib/carbon-engine.ts`.
+- Emission factors should be cached in memory (via `loadFactors()`) on first access to avoid redundant database reads during queries.
+- Activity logs calculations must call the generic `calculateCo2e(category, subType, quantity)` helper, which automatically performs quantity checks (throwing on negative values) and active factor matches.
+- Specific category calculation helper wrappers (such as `calculateTransport`, `calculateFood`, and `calculateEnergy`) must be used for type-safe parameter lookups.
+- Period-based aggregations should call `sumActivitiesByCategory(userId, period)` to compute summed totals by category over 'day', 'week', or 'month' periods.
+- Ensure all logic is covered by deterministic unit tests (using mocks for database drivers).
+
 ## Linting and Formatting
 
 - ESLint uses the Next.js 16 flat config in `eslint.config.mjs`; `.eslintrc.js` is kept as a legacy reference for the rule set described in the task docs.
