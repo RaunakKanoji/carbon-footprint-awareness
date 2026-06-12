@@ -87,6 +87,14 @@ The application provides secure API endpoints to perform client-driven queries a
   - *Request Body*: `{ month: string, targetKg: number }` (where `month` is normalized to the first day of that month).
   - *Response*: `{ success: true, budgetId: string, targetKg: number }`
 
+### AI Copilot
+- **GET `/api/copilot`**: Retrieves the message history for a specific conversation.
+  - *Query Params*: `?conversationId=string`
+  - *Response*: `{ success: true, messages: Array<{ id: string, role: string, content: string, createdAt: string }> }`
+- **POST `/api/copilot`**: Sends a new message to the AI coach, logs history, and gets coach feedback.
+  - *Request Body*: `{ message: string, conversationId?: string }` (omitting `conversationId` starts a new chat thread).
+  - *Response*: `{ success: true, conversationId: string, message: { id: string, role: string, content: string, createdAt: string } }`
+
 ## Invariants
 
 1. **Separation of concerns:** UI components never read from or write to the database directly; all persistence flows through API routes or server actions.
