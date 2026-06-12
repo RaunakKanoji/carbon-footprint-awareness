@@ -76,24 +76,27 @@ Certain recurring actions, such as resetting the monthly budget consumption at t
 The application provides secure API endpoints to perform client-driven queries and mutations:
 
 ### Activities
+
 - **POST `/api/activity`**: Logs a new activity for the user.
-  - *Request Body*: `{ category: string, subType: string, quantity: number, passengers?: number, occurredAt?: string, note?: string }`
-  - *Response*: `{ success: true, logId: string, co2eKg: number }`
+  - _Request Body_: `{ category: string, subType: string, quantity: number, passengers?: number, occurredAt?: string, note?: string }`
+  - _Response_: `{ success: true, logId: string, co2eKg: number }`
 
 ### Budgets
+
 - **GET `/api/budget`**: Retrieves the current month's budget details and consumption.
-  - *Response*: `{ success: true, budget: { month: string, targetKg: number }, consumption: number, remaining: number }`
+  - _Response_: `{ success: true, budget: { month: string, targetKg: number }, consumption: number, remaining: number }`
 - **POST `/api/budget`**: Creates or updates a carbon budget limit for a specific month.
-  - *Request Body*: `{ month: string, targetKg: number }` (where `month` is normalized to the first day of that month).
-  - *Response*: `{ success: true, budgetId: string, targetKg: number }`
+  - _Request Body_: `{ month: string, targetKg: number }` (where `month` is normalized to the first day of that month).
+  - _Response_: `{ success: true, budgetId: string, targetKg: number }`
 
 ### AI Copilot
+
 - **GET `/api/copilot`**: Retrieves the message history for a specific conversation.
-  - *Query Params*: `?conversationId=string`
-  - *Response*: `{ success: true, messages: Array<{ id: string, role: string, content: string, createdAt: string }> }`
+  - _Query Params_: `?conversationId=string`
+  - _Response_: `{ success: true, messages: Array<{ id: string, role: string, content: string, createdAt: string }> }`
 - **POST `/api/copilot`**: Sends a new message to the AI coach, logs history, and gets coach feedback.
-  - *Request Body*: `{ message: string, conversationId?: string }` (omitting `conversationId` starts a new chat thread).
-  - *Response*: `{ success: true, conversationId: string, message: { id: string, role: string, content: string, createdAt: string } }`
+  - _Request Body_: `{ message: string, conversationId?: string }` (omitting `conversationId` starts a new chat thread).
+  - _Response_: `{ success: true, conversationId: string, message: { id: string, role: string, content: string, createdAt: string } }`
 
 ## Invariants
 

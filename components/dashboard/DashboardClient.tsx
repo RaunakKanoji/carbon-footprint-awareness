@@ -85,7 +85,7 @@ export default function DashboardClient({
   // Budget status logic
   const budgetRatio = monthlyBudget > 0 ? monthlyConsumption / monthlyBudget : 0;
   const isBudgetExceeded = monthlyConsumption > monthlyBudget;
-  const isBudgetWarning = !isBudgetExceeded && budgetRatio >= 0.80;
+  const isBudgetWarning = !isBudgetExceeded && budgetRatio >= 0.8;
 
   let budgetStatusText = 'On track';
   let budgetBadgeColor = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';

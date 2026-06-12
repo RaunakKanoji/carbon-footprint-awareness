@@ -1,8 +1,10 @@
 'use client';
 
 import * as Icons from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
 import React, { useState, useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -94,7 +96,9 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
         throw new Error(data.error || 'Failed to save carbon budget.');
       }
 
-      setSuccessMsg(`Successfully configured budget of ${parsedTarget} kg CO₂e for ${formatMonth(monthDateStr)}!`);
+      setSuccessMsg(
+        `Successfully configured budget of ${parsedTarget} kg CO₂e for ${formatMonth(monthDateStr)}!`,
+      );
 
       // Refresh server component data
       startTransition(() => {
