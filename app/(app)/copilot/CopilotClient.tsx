@@ -1,9 +1,11 @@
 'use client';
 
 import * as Icons from 'lucide-react';
+
 import React, { useEffect, useRef, useState } from 'react';
 
 import PageHeader from '@/components/app/page-header';
+
 interface ConversationItem {
   id: string;
   title: string;
@@ -161,8 +163,8 @@ export default function CopilotClient({
         // Append text chunk progressively
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.id === assistantMsgTempId ? { ...msg, content: msg.content + textChunk } : msg
-          )
+            msg.id === assistantMsgTempId ? { ...msg, content: msg.content + textChunk } : msg,
+          ),
         );
       }
 
@@ -178,15 +180,17 @@ export default function CopilotClient({
       } else {
         setConversations((prev) =>
           prev.map((c) =>
-            c.id === activeConversationId ? { ...c, updatedAt: new Date().toISOString() } : c
-          )
+            c.id === activeConversationId ? { ...c, updatedAt: new Date().toISOString() } : c,
+          ),
         );
       }
     } catch (err) {
       console.error(err);
       setErrorText(err instanceof Error ? err.message : 'Failed to send message.');
       // Remove temp messages since request failed
-      setMessages((prev) => prev.filter((m) => m.id !== userMsgTemp.id && m.id !== assistantMsgTempId));
+      setMessages((prev) =>
+        prev.filter((m) => m.id !== userMsgTemp.id && m.id !== assistantMsgTempId),
+      );
     } finally {
       setIsSending(false);
     }
@@ -194,10 +198,22 @@ export default function CopilotClient({
 
   // Preset chips list
   const starterChips = [
-    { label: 'Suggest transport reduction tips', text: 'How can I reduce my transport carbon footprint?' },
-    { label: 'Green meal adjustments', text: 'What food and diet habits save the most carbon emissions?' },
-    { label: 'Analyze monthly budget targets', text: 'Review my monthly carbon budget logs and status.' },
-    { label: 'Energy saving recommendations', text: 'Provide three simple steps to lower my household electricity footprint.' },
+    {
+      label: 'Suggest transport reduction tips',
+      text: 'How can I reduce my transport carbon footprint?',
+    },
+    {
+      label: 'Green meal adjustments',
+      text: 'What food and diet habits save the most carbon emissions?',
+    },
+    {
+      label: 'Analyze monthly budget targets',
+      text: 'Review my monthly carbon budget logs and status.',
+    },
+    {
+      label: 'Energy saving recommendations',
+      text: 'Provide three simple steps to lower my household electricity footprint.',
+    },
   ];
 
   return (
@@ -208,7 +224,8 @@ export default function CopilotClient({
         badge="Copilot Active"
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 overflow-hidden h-full">
+      <div className="flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full overflow-visible p-1 pb-2">
         {/* LEFT COLUMN: Sidebar Chat History */}
         <div className="lg:col-span-1 bg-bg-surface border border-border-default/60 rounded-2xl flex flex-col overflow-hidden h-full shadow-sm">
           {/* Header */}
@@ -242,7 +259,9 @@ export default function CopilotClient({
                         : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/70 border border-transparent'
                     }`}
                   >
-                    <Icons.MessageSquare className={`w-4 h-4 shrink-0 ${isActive ? 'text-accent-primary' : 'text-text-muted'}`} />
+                    <Icons.MessageSquare
+                      className={`w-4 h-4 shrink-0 ${isActive ? 'text-accent-primary' : 'text-text-muted'}`}
+                    />
                     <span className="truncate flex-1">{conv.title}</span>
                     <Icons.ChevronRight className="w-3 h-3 text-text-faint opacity-0 group-hover:opacity-100 transition-opacity" />
                   </button>
@@ -266,7 +285,8 @@ export default function CopilotClient({
             <div>
               <h3 className="font-bold text-text-primary text-xs tracking-tight">
                 {activeConversationId
-                  ? conversations.find((c) => c.id === activeConversationId)?.title || 'AI Chat Coach'
+                  ? conversations.find((c) => c.id === activeConversationId)?.title ||
+                    'AI Chat Coach'
                   : 'New Conversation Thread'}
               </h3>
               <p className="text-[10px] text-text-secondary font-medium mt-0.5">
@@ -309,18 +329,23 @@ export default function CopilotClient({
                         <div className="space-y-1.5 whitespace-pre-wrap">
                           {m.content.split('\n').map((line, idx) => {
                             // Render simple bullets
-                            const isBullet = line.trim().startsWith('* ') || line.trim().startsWith('- ');
+                            const isBullet =
+                              line.trim().startsWith('* ') || line.trim().startsWith('- ');
                             const isNumbered = /^\d+\.\s/.test(line.trim());
-                            
+
                             let contentLine = line;
-                            if (isBullet) contentLine = contentLine.replace(/^[\s]*(?:\*|-)\s+/, '• ');
+                            if (isBullet)
+                              contentLine = contentLine.replace(/^[\s]*(?:\*|-)\s+/, '• ');
 
                             // Parse bold matches (**text**)
                             const parts = contentLine.split(/(\*\*.*?\*\*)/g);
                             const parsedLine = parts.map((part, pIdx) => {
                               if (part.startsWith('**') && part.endsWith('**')) {
                                 return (
-                                  <strong key={pIdx} className="font-extrabold text-text-primary dark:text-white">
+                                  <strong
+                                    key={pIdx}
+                                    className="font-extrabold text-text-primary dark:text-white"
+                                  >
                                     {part.slice(2, -2)}
                                   </strong>
                                 );
@@ -347,9 +372,18 @@ export default function CopilotClient({
                 {isSending && (
                   <div className="flex justify-start animate-pulse">
                     <div className="bg-bg-elevated/80 text-text-primary border border-border-subtle rounded-2xl rounded-bl-none px-4 py-3.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <span
+                        className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce"
+                        style={{ animationDelay: '0ms' }}
+                      />
+                      <span
+                        className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce"
+                        style={{ animationDelay: '150ms' }}
+                      />
+                      <span
+                        className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce"
+                        style={{ animationDelay: '300ms' }}
+                      />
                     </div>
                   </div>
                 )}
@@ -366,7 +400,8 @@ export default function CopilotClient({
                     How can I assist your reduction goals today?
                   </h3>
                   <p className="text-xs text-text-secondary leading-relaxed">
-                    Ask me about your log targets, electricity bills, public transport alternatives, or custom dietary reduction ideas.
+                    Ask me about your log targets, electricity bills, public transport alternatives,
+                    or custom dietary reduction ideas.
                   </p>
                 </div>
 
@@ -419,6 +454,7 @@ export default function CopilotClient({
             </form>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

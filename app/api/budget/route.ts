@@ -41,16 +41,17 @@ export async function POST(req: Request) {
 
     const { month, targetKg } = result.data;
 
-    const parsedDate = new Date(month);
-    if (isNaN(parsedDate.getTime())) {
+    // Parse the incoming month string safely using UTC to avoid timezone-induced month shifting.
+    // new Date('2026-06-01') is parsed as UTC midnight, but then converting to local time
+    // with new Date(y, m, 1) re-introduces a local offset. Always use Date.UTC.
+    const parts = (month as string).split('-').map(Number);
+    if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) {
       return NextResponse.json(
         { success: false, error: 'Invalid month date format' },
         { status: 400 },
       );
     }
-
-    // Normalize to first day of the month, local time
-    const monthDate = new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1, 0, 0, 0, 0);
+    const monthDate = new Date(Date.UTC(parts[0], parts[1] - 1, 1));
 
     const budget = await prisma.budget.upsert({
       where: {

@@ -13,7 +13,15 @@ import { useAuth } from '@/src/hooks/useAuth';
 
 import { fetchProfileAndBudget, updateProfile } from './actions';
 
-type TabType = 'general' | 'transit' | 'lifestyle';
+type TabType = 'general' | 'transit' | 'lifestyle' | 'achievements';
+
+interface CompletedChallenge {
+  id: string;
+  title: string;
+  badgeName: string;
+  points: number;
+  completedAt: string | null;
+}
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -24,6 +32,19 @@ export default function ProfilePage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
+  const [completedChallenges, setCompletedChallenges] = useState<CompletedChallenge[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsMounted(true);
+    }, 0);
+  }, []);
+
+  const formatDate = (dateStr?: string | null) => {
+    if (!isMounted || !dateStr) return '';
+    return new Date(dateStr).toLocaleDateString();
+  };
 
   const {
     register,
@@ -62,6 +83,20 @@ export default function ProfilePage() {
       }
     }
     loadData();
+
+    // Fetch challenges to calculate points and badges
+    async function fetchChallenges() {
+      try {
+        const res = await fetch('/api/challenge');
+        const data = await res.json();
+        if (data.success) {
+          setCompletedChallenges(data.completedChallenges || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch challenges in profile page:', err);
+      }
+    }
+    fetchChallenges();
   }, [reset]);
 
   // Watch inputs for live baseline carbon footprint calculations
@@ -220,6 +255,14 @@ export default function ProfilePage() {
                 <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   Active
                 </span>
+                {completedChallenges.length > 0 && (
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center gap-1">
+                    <Icons.Award className="w-3 h-3 text-amber-500" />
+                    <span>
+                      {100 + completedChallenges.reduce((sum, c) => sum + c.points, 0)} pts
+                    </span>
+                  </span>
+                )}
               </div>
 
               <button
@@ -371,6 +414,19 @@ export default function ProfilePage() {
               >
                 <Icons.TrendingDown className="w-4 h-4" />
                 <span>Lifestyle & Budget</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('achievements')}
+                className={`flex-1 py-4 text-sm font-semibold border-b-2 transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  activeTab === 'achievements'
+                    ? 'border-accent-primary text-accent-primary bg-bg-surface'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50'
+                }`}
+              >
+                <Icons.Award className="w-4 h-4" />
+                <span>Achievements</span>
               </button>
             </div>
 
@@ -611,54 +667,112 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 )}
+
+                {/* Achievements Tab */}
+                {activeTab === 'achievements' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div>
+                      <h4 className="text-base font-bold text-text-primary">
+                        Achievements & Badges
+                      </h4>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        Track your unlocked eco-badges and total point achievements.
+                      </p>
+                    </div>
+
+                    {completedChallenges.length === 0 ? (
+                      <div className="text-center py-12 border border-border-default border-dashed rounded-xl max-w-md mx-auto px-4 space-y-3">
+                        <Icons.Award className="w-10 h-10 text-text-muted mx-auto animate-pulse" />
+                        <div className="space-y-1">
+                          <p className="text-sm font-bold text-text-primary animate-pulse">
+                            No Badges Yet
+                          </p>
+                          <p className="text-xs text-text-muted">
+                            Pledge to active challenges in the challenges page to unlock badges
+                            here.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {completedChallenges.map((challenge) => (
+                          <div
+                            key={challenge.id}
+                            className="bg-bg-base border border-amber-500/20 rounded-xl p-4 flex items-center gap-3.5"
+                          >
+                            <div className="h-11 w-11 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                              <Icons.Award className="w-5 h-5 text-amber-500" />
+                            </div>
+                            <div className="space-y-0.5">
+                              <h5 className="font-extrabold text-xs text-text-primary">
+                                {challenge.title}
+                              </h5>
+                              <p className="text-[10px] text-text-muted font-medium">
+                                Badge:{' '}
+                                <strong className="text-amber-600 font-bold">
+                                  {challenge.badgeName}
+                                </strong>
+                              </p>
+                              <p className="text-[10px] text-text-muted">
+                                Completed: {formatDate(challenge.completedAt)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Action Form Footer */}
-              <div className="p-4 bg-bg-base/40 border-t border-border-default flex items-center justify-between gap-3 shrink-0">
-                <div className="text-xs font-medium text-text-secondary">
-                  {isDirty ? (
-                    <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5 animate-pulse">
-                      <Icons.Info className="w-3.5 h-3.5" />
-                      Unsaved changes pending
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1.5">
-                      <Icons.ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                      All changes synchronized
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex gap-2.5">
-                  {isDirty && (
-                    <button
-                      type="button"
-                      onClick={handleDiscard}
-                      className="px-4 py-2 text-xs font-semibold rounded-lg border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer"
-                    >
-                      Discard
-                    </button>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || !isDirty}
-                    className="px-5 py-2 text-xs font-bold rounded-lg bg-accent-primary hover:bg-accent-primary/90 text-white transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Icons.Loader className="w-3.5 h-3.5 animate-spin" />
-                        <span>Saving...</span>
-                      </>
+              {activeTab !== 'achievements' && (
+                <div className="p-4 bg-bg-base/40 border-t border-border-default flex items-center justify-between gap-3 shrink-0">
+                  <div className="text-xs font-medium text-text-secondary">
+                    {isDirty ? (
+                      <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5 animate-pulse">
+                        <Icons.Info className="w-3.5 h-3.5" />
+                        Unsaved changes pending
+                      </span>
                     ) : (
-                      <>
-                        <Icons.Save className="w-3.5 h-3.5" />
-                        <span>Save Changes</span>
-                      </>
+                      <span className="flex items-center gap-1.5">
+                        <Icons.ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                        All changes synchronized
+                      </span>
                     )}
-                  </button>
+                  </div>
+
+                  <div className="flex gap-2.5">
+                    {isDirty && (
+                      <button
+                        type="button"
+                        onClick={handleDiscard}
+                        className="px-4 py-2 text-xs font-semibold rounded-lg border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer"
+                      >
+                        Discard
+                      </button>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || !isDirty}
+                      className="px-5 py-2 text-xs font-bold rounded-lg bg-accent-primary hover:bg-accent-primary/90 text-white transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Icons.Loader className="w-3.5 h-3.5 animate-spin" />
+                          <span>Saving...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Icons.Save className="w-3.5 h-3.5" />
+                          <span>Save Changes</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </form>
           </div>
         </div>

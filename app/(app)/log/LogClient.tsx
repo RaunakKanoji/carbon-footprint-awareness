@@ -1,17 +1,14 @@
 'use client';
 
 import * as Icons from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
 import React, { useState, useTransition } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { ActivityCategory } from '@/src/lib/activity-types';
-import {
-  EnergyForm,
-  FoodForm,
-  ShoppingForm,
-  TransportForm,
-  WasteForm,
-} from './CategoryForms';
+
+import { EnergyForm, FoodForm, ShoppingForm, TransportForm, WasteForm } from './CategoryForms';
 import { logActivityAction } from './actions';
 import {
   EnergyFormInput,
@@ -27,7 +24,9 @@ interface LogClientProps {
 
 export default function LogClient({ todayStr }: LogClientProps) {
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState<ActivityCategory>(ActivityCategory.Transport);
+  const [activeCategory, setActiveCategory] = useState<ActivityCategory>(
+    ActivityCategory.Transport,
+  );
   const [liveEstimate, setLiveEstimate] = useState<number>(0);
   const [isPending, startTransition] = useTransition();
 
@@ -87,7 +86,7 @@ export default function LogClient({ todayStr }: LogClientProps) {
       co2e: co2eKg,
     });
     setErrorInfo(null);
-    
+
     // Auto clear success banner after 8s
     setTimeout(() => {
       setSuccessInfo(null);
@@ -290,7 +289,7 @@ export default function LogClient({ todayStr }: LogClientProps) {
               <div className="flex-1">
                 <p className="font-bold">{successInfo.message}</p>
                 <p className="text-[11px] opacity-90 mt-1">
-                  Estimated impact: **{successInfo.co2e.toFixed(1)} kg CO₂e** saved to your monthly
+                  Estimated impact: <strong className="font-extrabold">{successInfo.co2e.toFixed(1)} kg CO₂e</strong> saved to your monthly
                   log history.
                 </p>
               </div>
@@ -351,7 +350,7 @@ export default function LogClient({ todayStr }: LogClientProps) {
       <div className="space-y-6 lg:col-span-1">
         <div className="bg-bg-surface border border-border-default/60 rounded-2xl p-5 shadow-sm space-y-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-          
+
           <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
             <Icons.Leaf className="w-5 h-5" />
           </div>
@@ -359,7 +358,8 @@ export default function LogClient({ todayStr }: LogClientProps) {
           <div className="space-y-1.5">
             <h4 className="font-bold text-text-primary text-xs">Why log your daily footprint?</h4>
             <p className="text-xs text-text-secondary leading-relaxed">
-              Tracking is the first step towards reduction. By logging your transit miles, meals, shopping and energy logs:
+              Tracking is the first step towards reduction. By logging your transit miles, meals,
+              shopping and energy logs:
             </p>
           </div>
 
@@ -367,19 +367,22 @@ export default function LogClient({ todayStr }: LogClientProps) {
             <li className="flex items-start gap-2.5 text-xs text-text-secondary leading-relaxed">
               <Icons.ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
               <span>
-                <strong className="font-bold text-text-primary">Personalized Guidance</strong>: Enables your AI Compass Coach to give highly specific tips to target high emissions.
+                <strong className="font-bold text-text-primary">Personalized Guidance</strong>:
+                Enables your AI Compass Coach to give highly specific tips to target high emissions.
               </span>
             </li>
             <li className="flex items-start gap-2.5 text-xs text-text-secondary leading-relaxed">
               <Icons.CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
               <span>
-                <strong className="font-bold text-text-primary">Realtime Budget Meters</strong>: Dashboard remaining bars react immediately to guide your choices.
+                <strong className="font-bold text-text-primary">Realtime Budget Meters</strong>:
+                Dashboard remaining bars react immediately to guide your choices.
               </span>
             </li>
             <li className="flex items-start gap-2.5 text-xs text-text-secondary leading-relaxed">
               <Icons.TrendingDown className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
               <span>
-                <strong className="font-bold text-text-primary">Identify Low-Hanging Fruit</strong>: Highlights category trends to replace high footprint commutes or heavy meats.
+                <strong className="font-bold text-text-primary">Identify Low-Hanging Fruit</strong>:
+                Highlights category trends to replace high footprint commutes or heavy meats.
               </span>
             </li>
           </ul>
@@ -390,7 +393,8 @@ export default function LogClient({ todayStr }: LogClientProps) {
                 Coach Quick tip
               </p>
               <p className="text-xs text-text-primary font-medium mt-1 leading-relaxed">
-                Swapping one long petrol car drive for metro or rail cuts transport emissions by up to <strong className="font-bold text-emerald-500">80%</strong>!
+                Swapping one long petrol car drive for metro or rail cuts transport emissions by up
+                to <strong className="font-bold text-emerald-500">80%</strong>!
               </p>
             </div>
           </div>
