@@ -1,8 +1,10 @@
 'use client';
 
 import * as Icons from 'lucide-react';
+
+import React, { useEffect, useState, useTransition } from 'react';
+
 import { useRouter } from 'next/navigation';
-import React, { useState, useTransition } from 'react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -20,9 +22,9 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // Form State
+  // Form State — use UTC date to avoid local-timezone shifting the month picker default
   const now = new Date();
-  const defaultMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const defaultMonthStr = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
   const [month, setMonth] = useState(defaultMonthStr);
   const [targetKg, setTargetKg] = useState('500');
 
@@ -30,25 +32,34 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Helper to format ISO Date to readable month and year
+  useEffect(() => {
+    setTimeout(() => {
+      setMounted(true);
+    }, 0);
+  }, []);
+
+  // Format an ISO date string as a human-readable month label, always in UTC
+  // so the display matches the stored UTC date and never shifts by local offset.
   const formatMonth = (isoString: string) => {
-    const date = new Date(isoString);
-    return date.toLocaleDateString('en-US', {
+    return new Intl.DateTimeFormat('en-US', {
       month: 'long',
       year: 'numeric',
       timeZone: 'UTC',
-    });
+    }).format(new Date(isoString));
   };
 
-  // Check if a record is for the current calendar month
-  const isCurrentMonth = (isoString: string) => {
+  // Determine budget status using pure UTC comparison so no local offset shifts the month.
+  const getBudgetStatus = (isoString: string): 'Active' | 'Archived' | 'Upcoming' => {
+    const now = new Date();
+    const currentMonthUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     const recordDate = new Date(isoString);
-    const currentDate = new Date();
-    return (
-      recordDate.getUTCFullYear() === currentDate.getFullYear() &&
-      recordDate.getUTCMonth() === currentDate.getMonth()
-    );
+    const recordMonthUTC = new Date(Date.UTC(recordDate.getUTCFullYear(), recordDate.getUTCMonth(), 1));
+
+    if (recordMonthUTC.getTime() === currentMonthUTC.getTime()) return 'Active';
+    if (recordMonthUTC.getTime() < currentMonthUTC.getTime()) return 'Archived';
+    return 'Upcoming';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,7 +105,18 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
         throw new Error(data.error || 'Failed to save carbon budget.');
       }
 
-      setSuccessMsg(`Successfully configured budget of ${parsedTarget} kg CO₂e for ${formatMonth(monthDateStr)}!`);
+      // Format the month string safely using UTC to get the correct label
+      const [y, m] = month.split('-').map(Number);
+      const labelDate = new Date(Date.UTC(y, m - 1, 1));
+      const monthLabel = new Intl.DateTimeFormat('en-US', {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }).format(labelDate);
+
+      setSuccessMsg(
+        `Successfully configured budget of ${parsedTarget} kg CO₂e for ${monthLabel}!`,
+      );
 
       // Refresh server component data
       startTransition(() => {
@@ -238,30 +260,37 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
                   </thead>
                   <tbody className="divide-y divide-border-default/50 text-text-primary">
                     {initialBudgets.map((budgetRecord) => {
-                      const current = isCurrentMonth(budgetRecord.month);
+                      const status = mounted ? getBudgetStatus(budgetRecord.month) : 'Archived';
+                      const isActive = status === 'Active';
 
                       return (
                         <tr
                           key={budgetRecord.id}
                           className={`hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors ${
-                            current ? 'bg-emerald-500/5 dark:bg-emerald-500/10 font-semibold' : ''
+                            isActive ? 'bg-emerald-500/5 dark:bg-emerald-500/10 font-semibold' : ''
                           }`}
                         >
                           <td className="py-3.5 px-4 flex items-center gap-2 text-text-primary">
                             <Icons.Calendar className="w-4 h-4 text-text-secondary shrink-0" />
                             <span>{formatMonth(budgetRecord.month)}</span>
                           </td>
-                          <td className="py-3.5 px-4 text-right font-mono text-text-primary">
+                          <td className="py-3.5 px-4 text-right text-text-primary">
                             {budgetRecord.targetKg.toFixed(0)} kg CO₂e
                           </td>
                           <td className="py-3.5 px-4 text-right">
-                            {current ? (
-                              <span className="inline-flex items-center rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
-                                Active Month
+                            {status === 'Active' && (
+                              <span className="inline-flex items-center rounded-full border border-accent-primary/20 bg-accent-primary-dim px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-primary">
+                                Active
                               </span>
-                            ) : (
-                              <span className="inline-flex items-center rounded-full bg-zinc-100 dark:bg-zinc-800 border border-border-default px-2 py-0.5 text-[10px] font-medium text-text-secondary uppercase tracking-wide">
+                            )}
+                            {status === 'Archived' && (
+                              <span className="inline-flex items-center rounded-full border border-border-default bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-text-secondary">
                                 Archived
+                              </span>
+                            )}
+                            {status === 'Upcoming' && (
+                              <span className="inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-600">
+                                Upcoming
                               </span>
                             )}
                           </td>

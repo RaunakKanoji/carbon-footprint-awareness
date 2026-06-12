@@ -85,7 +85,7 @@ export default function DashboardClient({
   // Budget status logic
   const budgetRatio = monthlyBudget > 0 ? monthlyConsumption / monthlyBudget : 0;
   const isBudgetExceeded = monthlyConsumption > monthlyBudget;
-  const isBudgetWarning = !isBudgetExceeded && budgetRatio >= 0.80;
+  const isBudgetWarning = !isBudgetExceeded && budgetRatio >= 0.8;
 
   let budgetStatusText = 'On track';
   let budgetBadgeColor = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
@@ -486,11 +486,12 @@ export default function DashboardClient({
                   <tbody className="divide-y divide-border-default/50 text-text-primary">
                     {recentActivities.map((log) => {
                       const meta = CategoryMetaMap[log.category as ActivityCategory];
-                      const date = new Date(log.occurredAt);
-                      const formattedDate = date.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      });
+                      const formattedDate = mounted
+                        ? new Date(log.occurredAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })
+                        : '';
 
                       // Format subType to human-readable (e.g. petrolCar -> Petrol Car)
                       const readableSubType = log.subType
@@ -522,10 +523,10 @@ export default function DashboardClient({
                               )}
                             </div>
                           </td>
-                          <td className="py-3 text-right text-text-secondary font-mono">
+                          <td className="py-3 text-right text-text-secondary">
                             {log.quantity.toFixed(1)} {log.unit}
                           </td>
-                          <td className="py-3 text-right font-semibold text-text-primary font-mono">
+                          <td className="py-3 text-right font-semibold text-text-primary">
                             {log.co2eKg.toFixed(2)}
                           </td>
                         </tr>

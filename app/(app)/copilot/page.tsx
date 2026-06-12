@@ -1,5 +1,6 @@
-import { redirect } from 'next/navigation';
 import React from 'react';
+
+import { redirect } from 'next/navigation';
 
 import CopilotClient from '@/app/(app)/copilot/CopilotClient';
 import { prisma } from '@/lib/prisma';

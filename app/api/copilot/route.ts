@@ -253,7 +253,13 @@ User's current calendar month emissions:
           } catch (err) {
             console.error('Gemini Stream Error:', err);
             // Fallback to local mock response
-            const fallbackResponse = generateLocalMockResponse(message, breakdown, highestCategory.category, monthlyBudget, totalEmissions);
+            const fallbackResponse = generateLocalMockResponse(
+              message,
+              breakdown,
+              highestCategory.category,
+              monthlyBudget,
+              totalEmissions,
+            );
             controller.enqueue(encoder.encode(fallbackResponse));
             await persistMessages(conversation.id, message, fallbackResponse);
             controller.close();
@@ -265,7 +271,7 @@ User's current calendar month emissions:
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
+          Connection: 'keep-alive',
           'x-conversation-id': conversation.id,
         },
       });
@@ -315,7 +321,13 @@ User's current calendar month emissions:
             controller.close();
           } catch (err) {
             console.error('OpenAI Error:', err);
-            const fallbackResponse = generateLocalMockResponse(message, breakdown, highestCategory.category, monthlyBudget, totalEmissions);
+            const fallbackResponse = generateLocalMockResponse(
+              message,
+              breakdown,
+              highestCategory.category,
+              monthlyBudget,
+              totalEmissions,
+            );
             controller.enqueue(encoder.encode(fallbackResponse));
             await persistMessages(conversation.id, message, fallbackResponse);
             controller.close();
@@ -327,14 +339,20 @@ User's current calendar month emissions:
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
+          Connection: 'keep-alive',
           'x-conversation-id': conversation.id,
         },
       });
     }
 
     // Default Fallback Mock Response (word-by-word streaming generator)
-    const mockResponse = generateLocalMockResponse(message, breakdown, highestCategory.category, monthlyBudget, totalEmissions);
+    const mockResponse = generateLocalMockResponse(
+      message,
+      breakdown,
+      highestCategory.category,
+      monthlyBudget,
+      totalEmissions,
+    );
     const stream = new ReadableStream({
       async start(controller) {
         const words = mockResponse.split(/(\s+)/);
@@ -351,7 +369,7 @@ User's current calendar month emissions:
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'x-conversation-id': conversation.id,
       },
     });
@@ -490,7 +508,12 @@ Would you like some specific tips to lower your highest category: **${highestCat
   }
 
   // Transport Specific
-  if (highestCategory === 'TRANSPORT' || msgLower.includes('travel') || msgLower.includes('transport') || msgLower.includes('car')) {
+  if (
+    highestCategory === 'TRANSPORT' ||
+    msgLower.includes('travel') ||
+    msgLower.includes('transport') ||
+    msgLower.includes('car')
+  ) {
     return `Transport is your primary driver of emissions. Here are three simple and actionable tips to reduce it:
 1. **Prefer Metro or Rail**: Opt for public metro networks or rail transit which cut emissions by up to 80% compared to solo car trips.
 2. **Combine Commutes**: Plan weekly runs to group grocery and utility trips into a single transit loop.
@@ -498,7 +521,12 @@ Would you like some specific tips to lower your highest category: **${highestCat
   }
 
   // Food Specific
-  if (highestCategory === 'FOOD' || msgLower.includes('food') || msgLower.includes('meat') || msgLower.includes('diet')) {
+  if (
+    highestCategory === 'FOOD' ||
+    msgLower.includes('food') ||
+    msgLower.includes('meat') ||
+    msgLower.includes('diet')
+  ) {
     return `Food choices represent a major contribution this month. Here are three ways to optimize your food footprint:
 1. **Try Meatless Mondays**: Replacing red meats or dairy with plant-based alternatives for just one day a week cuts food emissions by up to 15%.
 2. **Shop Local & Seasonal**: Import and storage logistics increase footprint. Try shopping at local farmers' markets.
@@ -506,7 +534,12 @@ Would you like some specific tips to lower your highest category: **${highestCat
   }
 
   // Energy Specific
-  if (highestCategory === 'ENERGY' || msgLower.includes('electricity') || msgLower.includes('energy') || msgLower.includes('power')) {
+  if (
+    highestCategory === 'ENERGY' ||
+    msgLower.includes('electricity') ||
+    msgLower.includes('energy') ||
+    msgLower.includes('power')
+  ) {
     return `Electricity consumption drives your energy scores. Try these three tips to lower utility footprint:
 1. **Optimize Aircon**: Keep cooling units at a standard 24°C (75°F); every degree higher saves roughly 6% power load.
 2. **Unplug Standby Devices**: Chargers and electronics consume trickle power. Use smart power strips to shut down devices completely when not in use.

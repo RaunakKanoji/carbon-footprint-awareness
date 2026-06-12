@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 
 import { ActivityCategory } from '@/app/generated/prisma';
 import { calculateCo2e, getEmissionFactorInfo } from '@/lib/carbon-engine';
+import { checkAndCompleteChallenges } from '@/lib/challenges';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, requireAuth } from '@/src/lib/auth';
 
@@ -112,11 +113,15 @@ export async function POST(req: Request) {
       },
     });
 
+    // Check for challenge progress completions
+    const completedChallenges = await checkAndCompleteChallenges(dbUser.id);
+
     return NextResponse.json(
       {
         success: true,
         logId: log.id,
         co2eKg: log.co2eKg,
+        completedChallenges,
       },
       { status: 201 },
     );

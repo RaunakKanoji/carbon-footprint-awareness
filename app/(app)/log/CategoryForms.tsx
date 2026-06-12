@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as Icons from 'lucide-react';
 
 import React, { useEffect } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { FieldValues } from 'react-hook-form';
 
 import NumberInput from '@/src/components/forms/NumberInput';
@@ -98,7 +98,7 @@ export function TransportForm({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     reset,
     formState: { errors },
   } = useForm<TransportFormInput>({
@@ -112,9 +112,9 @@ export function TransportForm({
     },
   });
 
-  const subType = watch('subType');
-  const distanceKm = watch('distanceKm');
-  const passengers = watch('passengers');
+  const subType = useWatch({ control, name: 'subType' });
+  const distanceKm = useWatch({ control, name: 'distanceKm' });
+  const passengers = useWatch({ control, name: 'passengers' });
 
   useEffect(() => {
     const factor = clientFactors[(subType || '').toLowerCase()] ?? 0;
@@ -218,7 +218,7 @@ export function FoodForm({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     reset,
     formState: { errors },
   } = useForm<FoodFormInput>({
@@ -231,8 +231,8 @@ export function FoodForm({
     },
   });
 
-  const subType = watch('subType');
-  const meals = watch('meals');
+  const subType = useWatch({ control, name: 'subType' });
+  const meals = useWatch({ control, name: 'meals' });
 
   useEffect(() => {
     const factor = clientFactors[(subType || '').toLowerCase()] ?? 0;
@@ -328,7 +328,7 @@ export function EnergyForm({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     reset,
     formState: { errors },
   } = useForm<EnergyFormInput>({
@@ -341,8 +341,8 @@ export function EnergyForm({
     },
   });
 
-  const subType = watch('subType');
-  const kWh = watch('kWh');
+  const subType = useWatch({ control, name: 'subType' });
+  const kWh = useWatch({ control, name: 'kWh' });
 
   useEffect(() => {
     const factor = clientFactors[(subType || '').toLowerCase()] ?? 0;
@@ -438,7 +438,7 @@ export function ShoppingForm({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     reset,
     formState: { errors },
   } = useForm<ShoppingFormInput>({
@@ -451,8 +451,8 @@ export function ShoppingForm({
     },
   });
 
-  const subType = watch('subType');
-  const quantity = watch('quantity');
+  const subType = useWatch({ control, name: 'subType' });
+  const quantity = useWatch({ control, name: 'quantity' });
 
   useEffect(() => {
     const factor = clientFactors[(subType || '').toLowerCase()] ?? 0;
@@ -548,7 +548,7 @@ export function WasteForm({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     reset,
     formState: { errors },
   } = useForm<WasteFormInput>({
@@ -561,8 +561,8 @@ export function WasteForm({
     },
   });
 
-  const subType = watch('subType');
-  const weight = watch('weight');
+  const subType = useWatch({ control, name: 'subType' });
+  const weight = useWatch({ control, name: 'weight' });
 
   useEffect(() => {
     const factor = clientFactors[(subType || '').toLowerCase()] ?? 0;

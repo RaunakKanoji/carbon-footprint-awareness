@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature or implementation st
 
 ## Current Goal
 
-- Implement Carbon Footprint Simulator (Task 22).
+- Implement Error Handling and Notifications (Task 25).
 
 ## Completed
 
@@ -38,14 +38,23 @@ Update this file whenever the current phase, active feature or implementation st
 - Implement Carbon Budget Feature (tasks/19-budget-feature.md).
 - Implement AI Copilot Integration (tasks/20-ai-copilot-integration.md).
 - Build Chat UI and Streaming (tasks/21-chat-ui-and-streaming.md).
+- Build Carbon Footprint Simulator (tasks/22-simulator.md).
+- Build Gamification: Challenges and Achievements (tasks/23-gamification-challenges.md).
+- Build Analytics and Charts (tasks/24-analytics-and-charts.md).
+- Polished implemented surfaces from Tasks 1–24.
+- Improved card hierarchy, layout consistency, and responsive behavior.
+- Stabilized dashboard, budget, activity logging, AI copilot, simulator, insights, challenges, profile, and onboarding screens.
+- Added or improved safe empty/loading/error states.
+- Cleaned unused code and removed non-production artifacts.
+- Verified forms avoid unsafe React Hook Form watch usage where applicable.
 
 ## In Progress
 
-- Ready to start Task 22: Build Carbon Footprint Simulator.
+- Task 25: Error Handling and Notifications.
 
 ## Next Up
 
-- Carbon Footprint Simulator (tasks/22-simulator.md).
+- Performance and Caching (tasks/26-performance-and-caching.md).
 
 ## Open Questions
 
@@ -94,6 +103,16 @@ Update this file whenever the current phase, active feature or implementation st
 - Re-read tasks/18-dashboard-page.md and completed the implementation of the main Carbon Compass dashboard page at `/dashboard`. Set up data fetching inside the page Server Component (today's footprint, weekly trend, monthly budget target, category breakdowns, and the 5 most recent activities), created the loading skeleton component (`loading.tsx`) to improve visual perceived performance, and built the high-fidelity `DashboardClient` utilizing Recharts for weekly and category percentage distribution visualization. It features interactive metric summary cards, dynamic remaining budget indicators, a context-aware AI suggestion block based on the maximum emission category, and a recent activities table. Verified TypeScript compiles cleanly and linter checks pass with zero errors.
 - Re-read tasks/19-budget-feature.md and completed implementation of the monthly carbon budget settings page at `app/(app)/settings/page.tsx` and the interactive client side form and budget history tracking table at `app/(app)/settings/SettingsClient.tsx`. The forms validate budget limits, normalized date values, and communicate with the `POST /api/budget` API securely. Changed dashboard warning flags in `components/dashboard/DashboardClient.tsx` to use the 80% consumption threshold. Verified TypeScript type checking, ESLint styles, and Vitest test runs with zero failures.
 - Re-read tasks/20-ai-copilot-integration.md and completed implementation of the AI Carbon Copilot endpoint GET & POST `/api/copilot` in `app/api/copilot/route.ts` and the interactive chat window dashboard at `app/(app)/copilot/page.tsx` and `app/(app)/copilot/CopilotClient.tsx`. Prompts leverage monthly carbon consumption log breakdowns and budget remaining targets, supporting OpenAI/Gemini requests with a high-fidelity local mockup generator fallback. Conversations and messages are persisted in PostgreSQL. Verified TypeScript compiles cleanly and linter runs with zero errors.
-- Completed Task 16 Activity Logging Forms connection: Created [LogClient.tsx](file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/log/LogClient.tsx) to manage tabs, live footprint estimates, state, and form submissions, and updated [page.tsx](file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/log/page.tsx) to enforce authentication/onboarding guards and render the dashboard forms layout. Verified with TypeScript compile and ESLint tests passing cleanly.
-- Re-read tasks/21-chat-ui-and-streaming.md and completed implementation of the real-time AI Carbon Copilot streaming integration: updated POST `/api/copilot` in [route.ts](file:///Users/admin/Code/carbon-footprint-awareness/app/api/copilot/route.ts) to utilize `streamGenerateContent` Gemini endpoint, return a chunked `ReadableStream` with `x-conversation-id` header metadata, simulate word-by-word streaming for fallbacks, and write log entries to PostgreSQL on stream close. Updated [CopilotClient.tsx](file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/copilot/CopilotClient.tsx) to consume streams with body reader hooks and progressively update UI state. Verified that TypeScript compilation, formatting, and ESLint compiler checks pass successfully.
-
+- Completed Task 16 Activity Logging Forms connection: Created [LogClient.tsx](<file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/log/LogClient.tsx>) to manage tabs, live footprint estimates, state, and form submissions, and updated [page.tsx](<file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/log/page.tsx>) to enforce authentication/onboarding guards and render the dashboard forms layout. Verified with TypeScript compile and ESLint tests passing cleanly.
+- Re-read tasks/21-chat-ui-and-streaming.md and completed implementation of the real-time AI Carbon Copilot streaming integration: updated POST `/api/copilot` in [route.ts](file:///Users/admin/Code/carbon-footprint-awareness/app/api/copilot/route.ts) to utilize `streamGenerateContent` Gemini endpoint, return a chunked `ReadableStream` with `x-conversation-id` header metadata, simulate word-by-word streaming for fallbacks, and write log entries to PostgreSQL on stream close. Updated [CopilotClient.tsx](<file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/copilot/CopilotClient.tsx>) to consume streams with body reader hooks and progressively update UI state. Verified that TypeScript compilation, formatting, and ESLint compiler checks pass successfully.
+- Re-read tasks/22-simulator.md and completed implementation of the Lifestyle Change Simulator with category sliders, dynamic equivalency counts, Recharts comparisons, and commit actions.
+- Re-read tasks/23-gamification-challenges.md and completed implementation of predefined challenges, api endpoints, sweeps on activity submit, a challenges list view with celebratory modal, and profile integrations.
+- Re-read tasks/24-analytics-and-charts.md and completed implementation of detailed footprint analytics, range filtering, Recharts trend/breakdown/subtype/commute charts, and a custom calendar activity heatmap.
+- Pre-commit refinement pass: Polished implemented surfaces from Tasks 1–24. Improved card hierarchy, layout consistency, and responsive behavior. Stabilized dashboard, settings budget tracking, logging, copilot, simulator, insights, challenges, profile, and onboarding screens. Added or improved safe empty/loading/error states. Cleaned unused imports/variables and corrected watch() usages to useWatch() inside CategoryForms.tsx. Tested typescript compile, linter, formatting, unit tests, and production build successfully.
+- This commit prepares the implemented MVP surfaces from Tasks 1–24 for GitHub commit and demo review. No unrelated post-Task-24 features were intentionally added.
+- Refined Top Carbon Drivers card layout in InsightsClient.tsx (space-y-3/pt-0/space-y-1) to eliminate excessive gap between the card header and list items.
+- Fixed all 4 issues from context/current-issues.md: (1) Chevron overlap fixed — using exact spec structure with `right-2.5 top-1/2 -translate-y-1/2` and `pr-8` padding; (2) Full-width page header divider fixed — replaced nested flex+PageHeader with a `<section className="border-b">` wrapper that spans full container width; (3) Human-readable activity subtype labels — created `lib/format-label.ts` with `formatDisplayLabel()` that handles camelCase/PascalCase/snake_case/ALL_CAPS, applied to Top Carbon Drivers; (4) Heatmap hover ring clipping fixed — added `overflow-y-visible px-1 pt-1` to the scroll container to prevent ring clipping on edge cells.
+- Fixed double asterisk rendering problem in the activity log success banner by wrapping the dynamic emissions impact value in an HTML `strong` element instead of raw markdown-style `**` text.
+- Fixed Issue 06: Bottom shadow of the main AI Copilot panels cut off. Wrapped the grid in a `flex-1 overflow-hidden` container and set the grid style to `h-full overflow-visible p-1 pb-2` to allow card shadows to render fully without clipping at the bottom or introducing full-page scrolling.
+- Reverted page typography to use Next.js `next/font/google` package (Inter and Fira Code) to optimize layout rendering and guarantee standard sans-serif system fonts render correctly when external assets cannot fetch.
+- Removed font-mono styling from numbers, quantities, and labels in dashboard and settings budget tables, ensuring uniform sans-serif (Inter) typography styling across the entire dashboard layout.
