@@ -1,7 +1,8 @@
-import { ClerkProvider, Show, SignInButton, SignUpButton } from '@clerk/nextjs';
+import { ClerkProvider, Show } from '@clerk/nextjs';
 
 import type { Metadata } from 'next';
 import { Fira_Code, Inter } from 'next/font/google';
+import Link from 'next/link';
 
 import '@/src/lib/icons';
 
@@ -35,16 +36,18 @@ export default function RootLayout({
             <header className="p-4 border-b border-border-default flex justify-between items-center bg-bg-surface">
               <div className="font-bold text-text-primary">Carbon Compass AI</div>
               <div className="flex gap-4">
-                <SignInButton mode="modal">
-                  <button className="px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer">
-                    Sign In
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="px-4 py-2 text-sm font-semibold rounded-lg border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer">
-                    Sign Up
-                  </button>
-                </SignUpButton>
+                <Link
+                  href="/sign-in"
+                  className="px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer inline-flex items-center justify-center"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="px-4 py-2 text-sm font-semibold rounded-lg border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer inline-flex items-center justify-center"
+                >
+                  Sign Up
+                </Link>
               </div>
             </header>
           </Show>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useAuth } from '@/src/hooks/useAuth';
 import { SignInButton, SignOutButton } from '@clerk/nextjs';
+
+import { useAuth } from '@/src/hooks/useAuth';
 
 export default function AuthTestPage() {
   const { user, dbUser, isLoaded, isSignedIn } = useAuth();
@@ -11,8 +12,12 @@ export default function AuthTestPage() {
       <div className="max-w-3xl w-full bg-bg-surface border border-border-default rounded-2xl shadow-xl overflow-hidden">
         {/* Header Banner */}
         <div className="p-8 bg-gradient-to-r from-emerald-600 to-teal-600 text-white flex flex-col gap-2">
-          <h1 className="text-3xl font-extrabold tracking-tight">Authentication & Profile Integration</h1>
-          <p className="text-emerald-100 font-medium">Verify Clerk credentials & Prisma PostgreSQL profile synchronization.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            Authentication & Profile Integration
+          </h1>
+          <p className="text-emerald-100 font-medium">
+            Verify Clerk credentials & Prisma PostgreSQL profile synchronization.
+          </p>
         </div>
 
         {/* Content Area */}
@@ -21,7 +26,9 @@ export default function AuthTestPage() {
           {!isLoaded ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-sm text-text-secondary font-semibold animate-pulse">Loading identity contexts...</p>
+              <p className="text-sm text-text-secondary font-semibold animate-pulse">
+                Loading identity contexts...
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -30,8 +37,11 @@ export default function AuthTestPage() {
                 <div className="flex justify-between items-center pb-4 border-b border-border-default">
                   <h3 className="font-bold text-lg text-text-primary">Clerk Authentication</h3>
                   <span
-                    className={`px-3 py-1 text-xs font-bold rounded-full ${isSignedIn ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
-                      }`}
+                    className={`px-3 py-1 text-xs font-bold rounded-full ${
+                      isSignedIn
+                        ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300'
+                        : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                    }`}
                   >
                     {isSignedIn ? 'SIGNED_IN' : 'SIGNED_OUT'}
                   </span>
@@ -49,12 +59,18 @@ export default function AuthTestPage() {
                         />
                       )}
                       <div>
-                        <h4 className="font-semibold text-text-primary">{user.fullName || 'No Name'}</h4>
-                        <p className="text-xs text-text-secondary">{user.primaryEmailAddress?.emailAddress}</p>
+                        <h4 className="font-semibold text-text-primary">
+                          {user.fullName || 'No Name'}
+                        </h4>
+                        <p className="text-xs text-text-secondary">
+                          {user.primaryEmailAddress?.emailAddress}
+                        </p>
                       </div>
                     </div>
                     <div className="pt-2 text-xs space-y-2 font-mono bg-bg-surface p-3 border border-border-default rounded-lg text-text-secondary break-all">
-                      <div><span className="font-bold text-text-primary">Clerk ID:</span> {user.id}</div>
+                      <div>
+                        <span className="font-bold text-text-primary">Clerk ID:</span> {user.id}
+                      </div>
                     </div>
                     <div className="pt-4">
                       <SignOutButton>
@@ -83,8 +99,11 @@ export default function AuthTestPage() {
                 <div className="flex justify-between items-center pb-4 border-b border-border-default">
                   <h3 className="font-bold text-lg text-text-primary">PostgreSQL Database</h3>
                   <span
-                    className={`px-3 py-1 text-xs font-bold rounded-full ${dbUser ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                      }`}
+                    className={`px-3 py-1 text-xs font-bold rounded-full ${
+                      dbUser
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                        : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                    }`}
                   >
                     {dbUser ? 'SYNCED' : 'UNSYNCED'}
                   </span>
@@ -95,7 +114,9 @@ export default function AuthTestPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-text-secondary font-medium">DB Name:</span>
-                        <span className="font-semibold text-text-primary">{dbUser.name || 'Null'}</span>
+                        <span className="font-semibold text-text-primary">
+                          {dbUser.name || 'Null'}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-text-secondary font-medium">DB Email:</span>
@@ -104,16 +125,22 @@ export default function AuthTestPage() {
                       <div className="flex justify-between text-sm">
                         <span className="text-text-secondary font-medium">Onboarded:</span>
                         <span
-                          className={`font-semibold ${dbUser.profile?.onboardingComplete ? 'text-green-600' : 'text-amber-600'
-                            }`}
+                          className={`font-semibold ${
+                            dbUser.profile?.onboardingComplete ? 'text-green-600' : 'text-amber-600'
+                          }`}
                         >
                           {dbUser.profile?.onboardingComplete ? 'Completed' : 'Pending'}
                         </span>
                       </div>
                     </div>
                     <div className="pt-2 text-xs space-y-2 font-mono bg-bg-surface p-3 border border-border-default rounded-lg text-text-secondary break-all">
-                      <div><span className="font-bold text-text-primary">DB User ID:</span> {dbUser.id}</div>
-                      <div><span className="font-bold text-text-primary">Profile ID:</span> {dbUser.profile?.id || 'Null'}</div>
+                      <div>
+                        <span className="font-bold text-text-primary">DB User ID:</span> {dbUser.id}
+                      </div>
+                      <div>
+                        <span className="font-bold text-text-primary">Profile ID:</span>{' '}
+                        {dbUser.profile?.id || 'Null'}
+                      </div>
                     </div>
                   </div>
                 ) : (

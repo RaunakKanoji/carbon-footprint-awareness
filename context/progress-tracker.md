@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature or implementation st
 
 ## Current Goal
 
-- Implement Activity Categories (Task 15).
+- Build Dashboard Page (Task 18).
 
 ## Completed
 
@@ -31,14 +31,17 @@ Update this file whenever the current phase, active feature or implementation st
 - Build Onboarding Form and Redirect Guard (tasks/12-onboarding-form.md).
 - Create User Profile Page (tasks/13-user-profile-page.md).
 - Implement Carbon Calculation Engine (tasks/14-carbon-engine-setup.md).
+- Implement Activity Categories (tasks/15-activity-categories.md).
+- Implement Activity Logging Forms (tasks/16-activity-logging-forms.md).
+- Create API Endpoints for Activity Logs and Budgets (tasks/17-api-endpoints-for-logs.md).
 
 ## In Progress
 
-- Ready to start Task 15: Implement Activity Categories.
+- Ready to start Task 18: Build Dashboard Page.
 
 ## Next Up
 
-- Implement Activity Logging Forms (tasks/16-activity-logging-forms.md).
+- Implement Carbon Budget Feature (tasks/19-budget-feature.md).
 
 ## Open Questions
 
@@ -81,3 +84,6 @@ Update this file whenever the current phase, active feature or implementation st
 - Fixed sidebar brand header height (setting `h-16`) to align its bottom border line with the topbar header next to it. Wrapped the root layout header in a `<Show when="signed-out">` conditional rendering wrapper to fix the double header layout clash when signed in. Reverted sign-in and sign-up buttons to Clerk's modal mode (`mode="modal"`) with matching emerald styles, and added a mobile-only `UserButton` container inside `AppTopbar` so signed-in mobile users can still sign out and manage their sessions easily when the main sidebar is hidden. Verification: `npx tsc --noEmit` and `npm run build` compiled successfully, and ESLint checks passed with zero errors or warnings.
 - Re-read tasks/13-user-profile-page.md and completed implementation of the User Profile management page. Integrated the Clerk account settings triggers, grouped profile preferences into tabbed settings sections (General & Location, Transit & Utilities, Lifestyle & Budget), and implemented real-time baseline footprint calculations on the client side with a complete visual breakdown. Verified TypeScript type checks, ESLint rules, and Next.js production builds compile successfully.
 - Re-read tasks/14-carbon-engine-setup.md and implemented the database-backed Carbon Calculation Engine. Added factor loading with in-memory caching in `lib/carbon-engine.ts`, input quantity and category validations, generic `calculateCo2e` lookup, specific category helper wrappers, and period-based aggregation (`sumActivitiesByCategory`). Created standard Vitest unit tests in `lib/carbon-engine.test.ts` covering 10 assertion cases and verified that all tests, linter configurations, and production builds compile successfully.
+- Re-read tasks/15-activity-categories.md and established standardized activity categories and subtypes in `src/lib/activity-types.ts`. Mapped categories to label strings, color-coded Tailwind utility tags, and Font Awesome icon objects. Aligned types and enums with Prisma client schemas, and documented categories/subtypes definition details in `context/architecture-context.md`. Checked that type safety compiles cleanly and Vitest checks pass successfully.
+- Re-read tasks/16-activity-logging-forms.md and implemented category-specific form components (`TransportForm`, `FoodForm`, `EnergyForm`, `ShoppingForm`, `WasteForm`) in `app/(app)/log/CategoryForms.tsx` using reusable form inputs (`ValidationError`, `NumberInput`, `SelectInput`, `TextareaInput`) stored in `src/components/forms/`. Each form validates itself via separate Zod schemas, computes client-side live estimates, and passes them up. Documented in `code-standards.md`.
+- Re-read tasks/17-api-endpoints-for-logs.md and implemented secure Next.js API routes `/api/activity` and `/api/budget` with Zod input schema validations, database user lazily-loaded authorization checks, carbon calculation integrations, and PostgreSQL storage. Added API contracts to `architecture-context.md`. Example contracts: POST `/api/activity` expects `{ category, subType, quantity, passengers?, occurredAt?, note? }` and returns `{ success, logId, co2eKg }`. POST `/api/budget` expects `{ month, targetKg }` and returns `{ success, budgetId, targetKg }`. GET `/api/budget` returns budget targets and current calendar month summed activity consumption.
