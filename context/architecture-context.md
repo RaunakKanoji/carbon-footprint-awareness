@@ -71,6 +71,22 @@ AI interactions are orchestrated by Trigger.dev workflows defined under `trigger
 
 Certain recurring actions, such as resetting the monthly budget consumption at the start of each month, are implemented as scheduled Trigger.dev workflows. These jobs iterate through users, reset counters and persist the results. Scheduled tasks must be idempotent and atomic; they must not run concurrently for the same user.
 
+## API Contracts
+
+The application provides secure API endpoints to perform client-driven queries and mutations:
+
+### Activities
+- **POST `/api/activity`**: Logs a new activity for the user.
+  - *Request Body*: `{ category: string, subType: string, quantity: number, passengers?: number, occurredAt?: string, note?: string }`
+  - *Response*: `{ success: true, logId: string, co2eKg: number }`
+
+### Budgets
+- **GET `/api/budget`**: Retrieves the current month's budget details and consumption.
+  - *Response*: `{ success: true, budget: { month: string, targetKg: number }, consumption: number, remaining: number }`
+- **POST `/api/budget`**: Creates or updates a carbon budget limit for a specific month.
+  - *Request Body*: `{ month: string, targetKg: number }` (where `month` is normalized to the first day of that month).
+  - *Response*: `{ success: true, budgetId: string, targetKg: number }`
+
 ## Invariants
 
 1. **Separation of concerns:** UI components never read from or write to the database directly; all persistence flows through API routes or server actions.

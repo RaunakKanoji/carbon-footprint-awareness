@@ -1,27 +1,32 @@
 import React from 'react';
-import LandingHero from '@/components/landing/landing-hero';
+
 import FeatureCard from '@/components/landing/feature-card';
+import LandingHero from '@/components/landing/landing-hero';
 
 export default function RootLandingPage() {
   const features = [
     {
       title: 'Daily Carbon Tracking',
-      description: 'Log daily transit, food consumption, and electricity usage with instantaneous calculation of greenhouse gas impact.',
+      description:
+        'Log daily transit, food consumption, and electricity usage with instantaneous calculation of greenhouse gas impact.',
       iconName: 'PlusCircle',
     },
     {
       title: 'AI Carbon Copilot',
-      description: 'Interact with an intelligent sustainability chatbot that analyzes your logs and delivers custom offset recommendations.',
+      description:
+        'Interact with an intelligent sustainability chatbot that analyzes your logs and delivers custom offset recommendations.',
       iconName: 'Bot',
     },
     {
       title: 'Lifestyle Simulator',
-      description: 'Model future options (e.g. buying an EV or changing your diet) to quantify offsets before you make the switch.',
+      description:
+        'Model future options (e.g. buying an EV or changing your diet) to quantify offsets before you make the switch.',
       iconName: 'Sliders',
     },
     {
       title: 'Carbon Budget',
-      description: 'Define monthly greenhouse gas limits, track progress visually, and unlock gamified reduction goals.',
+      description:
+        'Define monthly greenhouse gas limits, track progress visually, and unlock gamified reduction goals.',
       iconName: 'Trophy',
     },
   ];
