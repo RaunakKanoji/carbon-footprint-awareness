@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature or implementation st
 
 ## Current Goal
 
-- Build Dashboard Page (Task 18).
+- Implement Carbon Footprint Simulator (Task 22).
 
 ## Completed
 
@@ -34,14 +34,18 @@ Update this file whenever the current phase, active feature or implementation st
 - Implement Activity Categories (tasks/15-activity-categories.md).
 - Implement Activity Logging Forms (tasks/16-activity-logging-forms.md).
 - Create API Endpoints for Activity Logs and Budgets (tasks/17-api-endpoints-for-logs.md).
+- Build Dashboard Page (tasks/18-dashboard-page.md).
+- Implement Carbon Budget Feature (tasks/19-budget-feature.md).
+- Implement AI Copilot Integration (tasks/20-ai-copilot-integration.md).
+- Build Chat UI and Streaming (tasks/21-chat-ui-and-streaming.md).
 
 ## In Progress
 
-- Ready to start Task 18: Build Dashboard Page.
+- Ready to start Task 22: Build Carbon Footprint Simulator.
 
 ## Next Up
 
-- Implement Carbon Budget Feature (tasks/19-budget-feature.md).
+- Carbon Footprint Simulator (tasks/22-simulator.md).
 
 ## Open Questions
 
@@ -87,3 +91,9 @@ Update this file whenever the current phase, active feature or implementation st
 - Re-read tasks/15-activity-categories.md and established standardized activity categories and subtypes in `src/lib/activity-types.ts`. Mapped categories to label strings, color-coded Tailwind utility tags, and Font Awesome icon objects. Aligned types and enums with Prisma client schemas, and documented categories/subtypes definition details in `context/architecture-context.md`. Checked that type safety compiles cleanly and Vitest checks pass successfully.
 - Re-read tasks/16-activity-logging-forms.md and implemented category-specific form components (`TransportForm`, `FoodForm`, `EnergyForm`, `ShoppingForm`, `WasteForm`) in `app/(app)/log/CategoryForms.tsx` using reusable form inputs (`ValidationError`, `NumberInput`, `SelectInput`, `TextareaInput`) stored in `src/components/forms/`. Each form validates itself via separate Zod schemas, computes client-side live estimates, and passes them up. Documented in `code-standards.md`.
 - Re-read tasks/17-api-endpoints-for-logs.md and implemented secure Next.js API routes `/api/activity` and `/api/budget` with Zod input schema validations, database user lazily-loaded authorization checks, carbon calculation integrations, and PostgreSQL storage. Added API contracts to `architecture-context.md`. Example contracts: POST `/api/activity` expects `{ category, subType, quantity, passengers?, occurredAt?, note? }` and returns `{ success, logId, co2eKg }`. POST `/api/budget` expects `{ month, targetKg }` and returns `{ success, budgetId, targetKg }`. GET `/api/budget` returns budget targets and current calendar month summed activity consumption.
+- Re-read tasks/18-dashboard-page.md and completed the implementation of the main Carbon Compass dashboard page at `/dashboard`. Set up data fetching inside the page Server Component (today's footprint, weekly trend, monthly budget target, category breakdowns, and the 5 most recent activities), created the loading skeleton component (`loading.tsx`) to improve visual perceived performance, and built the high-fidelity `DashboardClient` utilizing Recharts for weekly and category percentage distribution visualization. It features interactive metric summary cards, dynamic remaining budget indicators, a context-aware AI suggestion block based on the maximum emission category, and a recent activities table. Verified TypeScript compiles cleanly and linter checks pass with zero errors.
+- Re-read tasks/19-budget-feature.md and completed implementation of the monthly carbon budget settings page at `app/(app)/settings/page.tsx` and the interactive client side form and budget history tracking table at `app/(app)/settings/SettingsClient.tsx`. The forms validate budget limits, normalized date values, and communicate with the `POST /api/budget` API securely. Changed dashboard warning flags in `components/dashboard/DashboardClient.tsx` to use the 80% consumption threshold. Verified TypeScript type checking, ESLint styles, and Vitest test runs with zero failures.
+- Re-read tasks/20-ai-copilot-integration.md and completed implementation of the AI Carbon Copilot endpoint GET & POST `/api/copilot` in `app/api/copilot/route.ts` and the interactive chat window dashboard at `app/(app)/copilot/page.tsx` and `app/(app)/copilot/CopilotClient.tsx`. Prompts leverage monthly carbon consumption log breakdowns and budget remaining targets, supporting OpenAI/Gemini requests with a high-fidelity local mockup generator fallback. Conversations and messages are persisted in PostgreSQL. Verified TypeScript compiles cleanly and linter runs with zero errors.
+- Completed Task 16 Activity Logging Forms connection: Created [LogClient.tsx](file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/log/LogClient.tsx) to manage tabs, live footprint estimates, state, and form submissions, and updated [page.tsx](file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/log/page.tsx) to enforce authentication/onboarding guards and render the dashboard forms layout. Verified with TypeScript compile and ESLint tests passing cleanly.
+- Re-read tasks/21-chat-ui-and-streaming.md and completed implementation of the real-time AI Carbon Copilot streaming integration: updated POST `/api/copilot` in [route.ts](file:///Users/admin/Code/carbon-footprint-awareness/app/api/copilot/route.ts) to utilize `streamGenerateContent` Gemini endpoint, return a chunked `ReadableStream` with `x-conversation-id` header metadata, simulate word-by-word streaming for fallbacks, and write log entries to PostgreSQL on stream close. Updated [CopilotClient.tsx](file:///Users/admin/Code/carbon-footprint-awareness/app/(app)/copilot/CopilotClient.tsx) to consume streams with body reader hooks and progressively update UI state. Verified that TypeScript compilation, formatting, and ESLint compiler checks pass successfully.
+
