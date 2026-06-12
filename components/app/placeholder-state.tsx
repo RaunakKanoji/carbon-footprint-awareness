@@ -1,5 +1,6 @@
-import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
+
+import Link from 'next/link';
 
 interface PlaceholderStateProps {
   title: string;
@@ -15,9 +16,7 @@ export default function PlaceholderState({
   actionHref,
 }: PlaceholderStateProps) {
   return (
-    <div 
-      className="flex flex-col items-center justify-center text-center p-8 sm:p-16 border border-dashed border-border-default rounded-xl bg-bg-surface space-y-6 w-full"
-    >
+    <div className="flex flex-col items-center justify-center text-center p-8 sm:p-16 border border-dashed border-border-default rounded-xl bg-bg-surface space-y-6 w-full">
       <div className="flex items-center justify-center w-16 h-16 rounded-full bg-accent-primary-dim text-accent-primary">
         <Sparkles className="w-8 h-8" />
       </div>
