@@ -33,7 +33,7 @@ library.add(
   faPersonRunning,
   faTree,
   faUser,
-  faCouch
+  faCouch,
 );
 
 // Map string keys to the icon objects to prevent singleton bugs in Next.js Server/Client bundles

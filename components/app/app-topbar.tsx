@@ -1,9 +1,11 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { Bell, Search } from 'lucide-react';
-import { sidebarNavigation } from '@/lib/navigation';
 import { UserButton } from '@clerk/nextjs';
+import { Bell, Search } from 'lucide-react';
+
+import { usePathname } from 'next/navigation';
+
+import { sidebarNavigation } from '@/lib/navigation';
 
 export default function AppTopbar() {
   const pathname = usePathname();
