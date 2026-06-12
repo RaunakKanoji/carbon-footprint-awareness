@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import React from 'react';
 
-import LogClient from '@/app/(app)/log/LogClient';
 import PageHeader from '@/components/app/page-header';
 import { getCurrentUser } from '@/src/lib/auth';
 
