@@ -33,13 +33,13 @@ export default function AppSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 ${
                 isActive
                   ? 'bg-accent-primary-dim text-accent-primary font-semibold border-l-4 border-accent-primary border-l-solid'
                   : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
               }`}
             >
-              <LucideIcon className="w-5 h-5 shrink-0" />
+              <LucideIcon className="w-5 h-5 shrink-0" aria-hidden="true" />
               <span>{item.title}</span>
             </Link>
           );
@@ -51,7 +51,7 @@ export default function AppSidebar() {
         <UserButton />
         <div className="flex flex-col min-w-0">
           <span className="text-xs font-semibold text-text-primary truncate">My Profile</span>
-          <span className="text-[10px] text-text-secondary truncate">Manage settings</span>
+          <span className="text-xs text-text-secondary truncate">Manage settings</span>
         </div>
       </div>
     </aside>

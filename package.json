@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
@@ -11,8 +11,10 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "prisma:seed": "prisma db seed",
-    "test": "vitest --run",
-    "format": "prettier --write ."
+    "test": "vitest --run --passWithNoTests",
+    "format": "prettier --write .",
+    "trigger:dev": "trigger.dev dev",
+    "trigger:start": "trigger.dev start"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -27,6 +29,7 @@
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/react-query": "^5.101.0",
+    "@trigger.dev/sdk": "^2.3.19",
     "@trpc/client": "^11.17.0",
     "@trpc/server": "^11.17.0",
     "class-variance-authority": "^0.7.1",

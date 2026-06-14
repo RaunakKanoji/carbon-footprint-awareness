@@ -27,8 +27,8 @@ export const ActivitySubTypes: Record<ActivityCategory, string[]> = {
   ],
   [ActivityCategory.Food]: ['veganMeal', 'vegetarianMeal', 'chickenMeal', 'beefMeal', 'fishMeal'],
   [ActivityCategory.Energy]: ['indiaGrid', 'solar'],
-  [ActivityCategory.Shopping]: ['tshirt', 'jeans', 'smartphone', 'laptop', 'shoes'],
-  [ActivityCategory.Waste]: ['generalWaste', 'recycledWaste', 'foodWaste'],
+  [ActivityCategory.Shopping]: ['clothingItem', 'electronicsItem', 'onlineOrder'],
+  [ActivityCategory.Waste]: ['landfillWaste', 'recycling', 'composting'],
 };
 
 export interface CategoryMeta {

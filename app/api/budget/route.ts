@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser, requireAuth } from '@/src/lib/auth';
+import { getCurrentUser } from '@/src/lib/auth';
 
 const budgetPostSchema = z.object({
   month: z.string().min(1, 'Month is required'),
@@ -12,18 +12,9 @@ const budgetPostSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    try {
-      await requireAuth();
-    } catch {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
     const dbUser = await getCurrentUser();
     if (!dbUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -83,18 +74,9 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
-    try {
-      await requireAuth();
-    } catch {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
     const dbUser = await getCurrentUser();
     if (!dbUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const now = new Date();

@@ -74,9 +74,15 @@ coverage/
 test-results/
 playwright-report/
 
-# Temporary files
+# Temporary and private files
 tmp/
 temp/
+scratch/
+private/
+secrets/
+credentials/
+personal/
+notes/
 *.tmp
 
 # AI/generated local context archives

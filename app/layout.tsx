@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Fira_Code, Inter } from 'next/font/google';
 import Link from 'next/link';
 
+import { ToastProvider } from '@/components/ui/toast-provider';
 import '@/src/lib/icons';
 
 import './globals.css';
@@ -38,20 +39,20 @@ export default function RootLayout({
               <div className="flex gap-4">
                 <Link
                   href="/sign-in"
-                  className="px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer inline-flex items-center justify-center"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/sign-up"
-                  className="px-4 py-2 text-sm font-semibold rounded-lg border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer inline-flex items-center justify-center"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-border-default px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25"
                 >
                   Sign Up
                 </Link>
               </div>
             </header>
           </Show>
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </body>
       </html>
     </ClerkProvider>

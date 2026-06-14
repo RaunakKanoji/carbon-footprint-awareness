@@ -37,7 +37,7 @@ export default async function SettingsPage() {
   }));
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="flex min-h-0 w-full flex-col gap-6 pb-6">
       <PageHeader
         title="Settings"
         description="Configure application preferences, monthly carbon limits, and sustainability targets."

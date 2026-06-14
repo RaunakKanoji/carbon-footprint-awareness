@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/src/lib/auth';
@@ -8,6 +9,8 @@ import { getCurrentUser } from '@/src/lib/auth';
 import InsightsClient from './InsightsClient';
 
 export default async function InsightsPage() {
+  await connection();
+
   const dbUser = await getCurrentUser();
 
   if (!dbUser) {
@@ -31,6 +34,15 @@ export default async function InsightsPage() {
       },
     },
     orderBy: { occurredAt: 'desc' },
+    select: {
+      id: true,
+      category: true,
+      subType: true,
+      quantity: true,
+      unit: true,
+      co2eKg: true,
+      occurredAt: true,
+    },
   });
 
   // Serialize dates to ISO strings for client component safety
@@ -45,7 +57,7 @@ export default async function InsightsPage() {
   }));
 
   return (
-    <div className="space-y-6 w-full pb-8">
+    <div className="flex min-h-0 w-full flex-col gap-6 pb-6">
       <InsightsClient initialLogs={serializedLogs} />
     </div>
   );

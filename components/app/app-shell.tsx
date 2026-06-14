@@ -1,4 +1,8 @@
+'use client';
+
 import React from 'react';
+
+import { usePathname } from 'next/navigation';
 
 import AppSidebar from './app-sidebar';
 import AppTopbar from './app-topbar';
@@ -9,6 +13,9 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+  const isViewportBound = ['/copilot', '/onboarding', '/log'].includes(pathname);
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-bg-base font-sans text-text-primary antialiased">
       {/* Sidebar - Desktop only */}
@@ -20,9 +27,21 @@ export default function AppShell({ children }: AppShellProps) {
       <div className="flex flex-col flex-1 h-full overflow-hidden min-w-0">
         <AppTopbar />
 
-        {/* Scrollable Page Content */}
-        <main className="flex-1 overflow-y-auto p-6 pb-24 md:pb-6">
-          <div className="w-full max-w-5xl mx-auto space-y-6">{children}</div>
+        {/* Page Content */}
+        <main
+          className={`flex-1 flex flex-col min-h-0 min-w-0 ${
+            isViewportBound
+              ? 'overflow-hidden p-6 pb-6 max-md:pb-20'
+              : 'overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]'
+          }`}
+        >
+          <div
+            className={`w-full max-w-5xl mx-auto flex-1 flex flex-col min-h-0 ${
+              isViewportBound ? '' : 'p-6 pb-6 max-md:pb-20'
+            }`}
+          >
+            {children}
+          </div>
         </main>
       </div>
 

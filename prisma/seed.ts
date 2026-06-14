@@ -113,6 +113,42 @@ const emissionFactors = [
     source: 'Initial development seed dataset',
     region: 'GLOBAL',
   },
+  {
+    category: ActivityCategory.WASTE,
+    subType: 'recycling',
+    unit: 'kg',
+    factor: 0.1,
+    description: 'Recycled waste per kg',
+    source: 'Initial development seed dataset',
+    region: 'GLOBAL',
+  },
+  {
+    category: ActivityCategory.WASTE,
+    subType: 'composting',
+    unit: 'kg',
+    factor: 0.05,
+    description: 'Composted organic waste per kg',
+    source: 'Initial development seed dataset',
+    region: 'GLOBAL',
+  },
+  {
+    category: ActivityCategory.SHOPPING,
+    subType: 'electronicsItem',
+    unit: 'item',
+    factor: 120.0,
+    description: 'Average electronics item',
+    source: 'Initial development seed dataset',
+    region: 'GLOBAL',
+  },
+  {
+    category: ActivityCategory.SHOPPING,
+    subType: 'onlineOrder',
+    unit: 'item',
+    factor: 3.5,
+    description: 'Online order delivery',
+    source: 'Initial development seed dataset',
+    region: 'GLOBAL',
+  },
 ];
 
 async function main() {

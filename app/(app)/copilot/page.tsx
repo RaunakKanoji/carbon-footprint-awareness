@@ -25,6 +25,11 @@ export default async function AiCopilotPage() {
     orderBy: {
       updatedAt: 'desc',
     },
+    select: {
+      id: true,
+      title: true,
+      updatedAt: true,
+    },
   });
 
   // Load messages of the most recent conversation if it exists
@@ -43,6 +48,12 @@ export default async function AiCopilotPage() {
       },
       orderBy: {
         createdAt: 'asc',
+      },
+      select: {
+        id: true,
+        role: true,
+        content: true,
+        createdAt: true,
       },
     });
 

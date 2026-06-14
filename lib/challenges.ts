@@ -94,12 +94,12 @@ export async function getChallengeProgress(
       },
     });
   } else if (template.key === 'waste-watcher') {
-    // Count WASTE activities of type recycledWaste or foodWaste since start date
+    // Count WASTE activities of type recycling or composting since start date
     current = await prisma.activityLog.count({
       where: {
         userId,
         category: ActivityCategory.WASTE,
-        subType: { in: ['recycledWaste', 'foodWaste'] },
+        subType: { in: ['recycling', 'composting'] },
         occurredAt: { gte: startDate },
       },
     });

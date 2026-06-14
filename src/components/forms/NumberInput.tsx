@@ -22,10 +22,10 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
           type="number"
           ref={ref}
           className={cn(
-            'w-full px-4 py-2.5 text-sm bg-bg-base border rounded-xl text-text-primary focus:outline-none focus:ring-1 transition-all',
+            'w-full px-4 py-2.5 text-sm bg-bg-base border rounded-xl text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-bg-surface',
             error
-              ? 'border-state-error focus:ring-state-error'
-              : 'border-border-default focus:ring-accent-primary focus:border-accent-primary',
+              ? 'border-state-error focus-visible:border-state-error focus-visible:ring-state-error/25'
+              : 'border-border-default focus-visible:border-accent-primary focus-visible:ring-accent-primary/25',
             inputClassName,
           )}
           {...props}

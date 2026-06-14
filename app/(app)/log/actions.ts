@@ -2,6 +2,8 @@
 
 import { auth } from '@clerk/nextjs/server';
 
+import { refresh, revalidatePath } from 'next/cache';
+
 import { ActivityCategory } from '@/app/generated/prisma';
 import { calculateCo2e, getEmissionFactorInfo } from '@/lib/carbon-engine';
 import { prisma } from '@/lib/prisma';
@@ -68,6 +70,12 @@ export async function logActivityAction(input: LogActivityInput) {
       occurredAt: occurredDate,
     },
   });
+
+  revalidatePath('/dashboard');
+  revalidatePath('/insights');
+  revalidatePath('/profile');
+  revalidatePath('/challenges');
+  refresh();
 
   return {
     success: true,
