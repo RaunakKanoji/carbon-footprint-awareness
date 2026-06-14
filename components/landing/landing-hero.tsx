@@ -13,7 +13,7 @@ export default function LandingHero() {
       <div className="relative max-w-4xl space-y-8 z-10 flex flex-col items-center">
         {/* Eco Badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider animate-fade-in">
-          <Leaf className="w-4 h-4" />
+          <Leaf className="w-4 h-4" aria-hidden="true" />
           <span>AI-Powered Carbon Compass</span>
         </div>
 
@@ -35,16 +35,16 @@ export default function LandingHero() {
         <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full sm:w-auto">
           <Link
             href={routes.signUp}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 text-base font-bold shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-emerald-500/20 transition-[background-color,transform] hover:scale-[1.02] hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 active:scale-[0.98] sm:w-auto"
           >
             <span>Get Started</span>
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-5 h-5" aria-hidden="true" />
           </Link>
           <Link
             href={routes.dashboard}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-bg-surface hover:bg-bg-base text-text-primary px-8 py-4 text-base font-bold border border-border-default transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-default bg-bg-surface px-8 py-4 text-base font-bold text-text-primary transition-[background-color,transform] hover:scale-[1.02] hover:bg-bg-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 active:scale-[0.98] sm:w-auto"
           >
-            <Play className="w-5 h-5 fill-current text-text-secondary" />
+            <Play className="w-5 h-5 fill-current text-text-secondary" aria-hidden="true" />
             <span>View Demo</span>
           </Link>
         </div>

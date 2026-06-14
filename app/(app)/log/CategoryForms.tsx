@@ -39,14 +39,12 @@ const clientFactors: Record<string, number> = {
   fishmeal: 3.0,
   indiagrid: 0.71,
   solar: 0,
-  tshirt: 7.0,
-  jeans: 33.0,
-  smartphone: 70.0,
-  laptop: 250.0,
-  shoes: 14.0,
-  generalwaste: 0.45,
-  recycledwaste: 0.1,
-  foodwaste: 0.75,
+  clothingitem: 8.0,
+  electronicsitem: 120.0,
+  onlineorder: 3.5,
+  landfillwaste: 0.45,
+  recycling: 0.1,
+  composting: 0.05,
 };
 
 const subTypeLabels: Record<string, string> = {
@@ -64,14 +62,12 @@ const subTypeLabels: Record<string, string> = {
   fishMeal: 'Fish / Seafood Meal',
   indiaGrid: 'Grid Electricity',
   solar: 'Solar Power (Zero Carbon)',
-  tshirt: 'T-Shirt',
-  jeans: 'Jeans / Denim',
-  smartphone: 'Smartphone',
-  laptop: 'Laptop / Computer',
-  shoes: 'Shoes / Footwear',
-  generalWaste: 'General Landfill Waste',
-  recycledWaste: 'Recycled Waste',
-  foodWaste: 'Composted/Food Waste',
+  clothingItem: 'Clothing Item',
+  electronicsItem: 'Electronics Item',
+  onlineOrder: 'Online Order',
+  landfillWaste: 'General Landfill Waste',
+  recycling: 'Recycling',
+  composting: 'Composting',
 };
 
 const getSubTypeOptions = (category: ActivityCategory) => {
@@ -81,9 +77,13 @@ const getSubTypeOptions = (category: ActivityCategory) => {
   }));
 };
 
+const dateInputClassName =
+  'w-full px-4 py-2.5 text-sm bg-bg-base border border-border-default rounded-xl text-text-primary transition-colors cursor-pointer focus-visible:outline-none focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-accent-primary/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bg-surface';
+
 interface FormBaseProps<T extends FieldValues> {
   onSubmit: SubmitHandler<T>;
   isSubmitting: boolean;
+  hideActions?: boolean;
   onLiveEstimateChange: (estimate: number) => void;
   todayStr: string;
 }
@@ -92,6 +92,7 @@ interface FormBaseProps<T extends FieldValues> {
 export function TransportForm({
   onSubmit,
   isSubmitting,
+  hideActions = false,
   onLiveEstimateChange,
   todayStr,
 }: FormBaseProps<TransportFormInput>) {
@@ -125,8 +126,8 @@ export function TransportForm({
   }, [subType, distanceKm, passengers, onLiveEstimateChange]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SelectInput
           label="Transport Type"
           options={getSubTypeOptions(ActivityCategory.Transport)}
@@ -153,7 +154,7 @@ export function TransportForm({
           <input
             type="date"
             max={todayStr}
-            className="w-full px-4 py-2.5 text-sm bg-bg-base border border-border-default rounded-xl text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary transition-all cursor-pointer"
+            className={dateInputClassName}
             {...register('occurredAt')}
           />
           {errors.occurredAt && (
@@ -164,46 +165,48 @@ export function TransportForm({
           label="Notes / Description (Optional)"
           placeholder="e.g. Daily office commute, carpool with friends"
           className="sm:col-span-2"
-          textareaClassName="resize-none h-20"
+          textareaClassName="resize-none h-16"
           error={errors.note?.message}
           {...register('note')}
         />
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
-        <button
-          type="button"
-          onClick={() =>
-            reset({
-              subType: 'petrolCar',
-              distanceKm: 0,
-              passengers: 1,
-              occurredAt: todayStr,
-              note: '',
-            })
-          }
-          className="px-5 py-2.5 text-xs font-semibold rounded-xl border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer"
-        >
-          Clear Fields
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2.5 text-xs font-bold rounded-xl bg-accent-primary hover:bg-accent-primary/90 text-white transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {isSubmitting ? (
-            <>
-              <Icons.Loader className="w-4 h-4 animate-spin" />
-              <span>Saving Log...</span>
-            </>
-          ) : (
-            <>
-              <Icons.PlusCircle className="w-4 h-4" />
-              <span>Log Transport</span>
-            </>
-          )}
-        </button>
-      </div>
+      {!hideActions && (
+        <div className="mt-auto flex items-center justify-end gap-3 border-t border-border-subtle pt-3">
+          <button
+            type="button"
+            onClick={() =>
+              reset({
+                subType: 'petrolCar',
+                distanceKm: 0,
+                passengers: 1,
+                occurredAt: todayStr,
+                note: '',
+              })
+            }
+            className="inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-border-default px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25"
+          >
+            Clear Fields
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Icons.Loader className="w-4 h-4 animate-spin" />
+                <span>Saving Log…</span>
+              </>
+            ) : (
+              <>
+                <Icons.PlusCircle className="w-4 h-4" />
+                <span>Log Transport</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </form>
   );
 }
@@ -212,6 +215,7 @@ export function TransportForm({
 export function FoodForm({
   onSubmit,
   isSubmitting,
+  hideActions = false,
   onLiveEstimateChange,
   todayStr,
 }: FormBaseProps<FoodFormInput>) {
@@ -242,8 +246,8 @@ export function FoodForm({
   }, [subType, meals, onLiveEstimateChange]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SelectInput
           label="Meal Type"
           options={getSubTypeOptions(ActivityCategory.Food)}
@@ -264,7 +268,7 @@ export function FoodForm({
           <input
             type="date"
             max={todayStr}
-            className="w-full px-4 py-2.5 text-sm bg-bg-base border border-border-default rounded-xl text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary transition-all cursor-pointer"
+            className={dateInputClassName}
             {...register('occurredAt')}
           />
           {errors.occurredAt && (
@@ -275,45 +279,47 @@ export function FoodForm({
           label="Notes / Description (Optional)"
           placeholder="e.g. Lunch with team, family dinner"
           className="sm:col-span-2"
-          textareaClassName="resize-none h-20"
+          textareaClassName="resize-none h-16"
           error={errors.note?.message}
           {...register('note')}
         />
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
-        <button
-          type="button"
-          onClick={() =>
-            reset({
-              subType: 'vegetarianMeal',
-              meals: 0,
-              occurredAt: todayStr,
-              note: '',
-            })
-          }
-          className="px-5 py-2.5 text-xs font-semibold rounded-xl border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer"
-        >
-          Clear Fields
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2.5 text-xs font-bold rounded-xl bg-accent-primary hover:bg-accent-primary/90 text-white transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {isSubmitting ? (
-            <>
-              <Icons.Loader className="w-4 h-4 animate-spin" />
-              <span>Saving Log...</span>
-            </>
-          ) : (
-            <>
-              <Icons.PlusCircle className="w-4 h-4" />
-              <span>Log Food</span>
-            </>
-          )}
-        </button>
-      </div>
+      {!hideActions && (
+        <div className="mt-auto flex items-center justify-end gap-3 border-t border-border-subtle pt-3">
+          <button
+            type="button"
+            onClick={() =>
+              reset({
+                subType: 'vegetarianMeal',
+                meals: 0,
+                occurredAt: todayStr,
+                note: '',
+              })
+            }
+            className="inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-border-default px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25"
+          >
+            Clear Fields
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Icons.Loader className="w-4 h-4 animate-spin" />
+                <span>Saving Log…</span>
+              </>
+            ) : (
+              <>
+                <Icons.PlusCircle className="w-4 h-4" />
+                <span>Log Food</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </form>
   );
 }
@@ -322,6 +328,7 @@ export function FoodForm({
 export function EnergyForm({
   onSubmit,
   isSubmitting,
+  hideActions = false,
   onLiveEstimateChange,
   todayStr,
 }: FormBaseProps<EnergyFormInput>) {
@@ -352,8 +359,8 @@ export function EnergyForm({
   }, [subType, kWh, onLiveEstimateChange]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SelectInput
           label="Energy Source"
           options={getSubTypeOptions(ActivityCategory.Energy)}
@@ -374,7 +381,7 @@ export function EnergyForm({
           <input
             type="date"
             max={todayStr}
-            className="w-full px-4 py-2.5 text-sm bg-bg-base border border-border-default rounded-xl text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary transition-all cursor-pointer"
+            className={dateInputClassName}
             {...register('occurredAt')}
           />
           {errors.occurredAt && (
@@ -385,45 +392,47 @@ export function EnergyForm({
           label="Notes / Description (Optional)"
           placeholder="e.g. Monthly meter reading, solar generation offset"
           className="sm:col-span-2"
-          textareaClassName="resize-none h-20"
+          textareaClassName="resize-none h-16"
           error={errors.note?.message}
           {...register('note')}
         />
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
-        <button
-          type="button"
-          onClick={() =>
-            reset({
-              subType: 'indiaGrid',
-              kWh: 0,
-              occurredAt: todayStr,
-              note: '',
-            })
-          }
-          className="px-5 py-2.5 text-xs font-semibold rounded-xl border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer"
-        >
-          Clear Fields
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2.5 text-xs font-bold rounded-xl bg-accent-primary hover:bg-accent-primary/90 text-white transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {isSubmitting ? (
-            <>
-              <Icons.Loader className="w-4 h-4 animate-spin" />
-              <span>Saving Log...</span>
-            </>
-          ) : (
-            <>
-              <Icons.PlusCircle className="w-4 h-4" />
-              <span>Log Energy</span>
-            </>
-          )}
-        </button>
-      </div>
+      {!hideActions && (
+        <div className="mt-auto flex items-center justify-end gap-3 border-t border-border-subtle pt-3">
+          <button
+            type="button"
+            onClick={() =>
+              reset({
+                subType: 'indiaGrid',
+                kWh: 0,
+                occurredAt: todayStr,
+                note: '',
+              })
+            }
+            className="inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-border-default px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25"
+          >
+            Clear Fields
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Icons.Loader className="w-4 h-4 animate-spin" />
+                <span>Saving Log…</span>
+              </>
+            ) : (
+              <>
+                <Icons.PlusCircle className="w-4 h-4" />
+                <span>Log Energy</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </form>
   );
 }
@@ -432,6 +441,7 @@ export function EnergyForm({
 export function ShoppingForm({
   onSubmit,
   isSubmitting,
+  hideActions = false,
   onLiveEstimateChange,
   todayStr,
 }: FormBaseProps<ShoppingFormInput>) {
@@ -444,7 +454,7 @@ export function ShoppingForm({
   } = useForm<ShoppingFormInput>({
     resolver: zodResolver(shoppingSchema),
     defaultValues: {
-      subType: 'tshirt',
+      subType: 'clothingItem',
       quantity: 0,
       occurredAt: todayStr,
       note: '',
@@ -462,8 +472,8 @@ export function ShoppingForm({
   }, [subType, quantity, onLiveEstimateChange]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SelectInput
           label="Product Type"
           options={getSubTypeOptions(ActivityCategory.Shopping)}
@@ -484,7 +494,7 @@ export function ShoppingForm({
           <input
             type="date"
             max={todayStr}
-            className="w-full px-4 py-2.5 text-sm bg-bg-base border border-border-default rounded-xl text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary transition-all cursor-pointer"
+            className={dateInputClassName}
             {...register('occurredAt')}
           />
           {errors.occurredAt && (
@@ -495,45 +505,47 @@ export function ShoppingForm({
           label="Notes / Description (Optional)"
           placeholder="e.g. Cotton clothing, eco-certified smartphone"
           className="sm:col-span-2"
-          textareaClassName="resize-none h-20"
+          textareaClassName="resize-none h-16"
           error={errors.note?.message}
           {...register('note')}
         />
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
-        <button
-          type="button"
-          onClick={() =>
-            reset({
-              subType: 'tshirt',
-              quantity: 0,
-              occurredAt: todayStr,
-              note: '',
-            })
-          }
-          className="px-5 py-2.5 text-xs font-semibold rounded-xl border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer"
-        >
-          Clear Fields
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2.5 text-xs font-bold rounded-xl bg-accent-primary hover:bg-accent-primary/90 text-white transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {isSubmitting ? (
-            <>
-              <Icons.Loader className="w-4 h-4 animate-spin" />
-              <span>Saving Log...</span>
-            </>
-          ) : (
-            <>
-              <Icons.PlusCircle className="w-4 h-4" />
-              <span>Log Shopping</span>
-            </>
-          )}
-        </button>
-      </div>
+      {!hideActions && (
+        <div className="mt-auto flex items-center justify-end gap-3 border-t border-border-subtle pt-3">
+          <button
+            type="button"
+            onClick={() =>
+              reset({
+                subType: 'clothingItem',
+                quantity: 0,
+                occurredAt: todayStr,
+                note: '',
+              })
+            }
+            className="inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-border-default px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25"
+          >
+            Clear Fields
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Icons.Loader className="w-4 h-4 animate-spin" />
+                <span>Saving Log…</span>
+              </>
+            ) : (
+              <>
+                <Icons.PlusCircle className="w-4 h-4" />
+                <span>Log Shopping</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </form>
   );
 }
@@ -542,6 +554,7 @@ export function ShoppingForm({
 export function WasteForm({
   onSubmit,
   isSubmitting,
+  hideActions = false,
   onLiveEstimateChange,
   todayStr,
 }: FormBaseProps<WasteFormInput>) {
@@ -554,7 +567,7 @@ export function WasteForm({
   } = useForm<WasteFormInput>({
     resolver: zodResolver(wasteSchema),
     defaultValues: {
-      subType: 'generalWaste',
+      subType: 'landfillWaste',
       weight: 0,
       occurredAt: todayStr,
       note: '',
@@ -572,8 +585,8 @@ export function WasteForm({
   }, [subType, weight, onLiveEstimateChange]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SelectInput
           label="Waste Type"
           options={getSubTypeOptions(ActivityCategory.Waste)}
@@ -594,7 +607,7 @@ export function WasteForm({
           <input
             type="date"
             max={todayStr}
-            className="w-full px-4 py-2.5 text-sm bg-bg-base border border-border-default rounded-xl text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary transition-all cursor-pointer"
+            className={dateInputClassName}
             {...register('occurredAt')}
           />
           {errors.occurredAt && (
@@ -605,45 +618,47 @@ export function WasteForm({
           label="Notes / Description (Optional)"
           placeholder="e.g. Weekly kitchen waste, recycling bag"
           className="sm:col-span-2"
-          textareaClassName="resize-none h-20"
+          textareaClassName="resize-none h-16"
           error={errors.note?.message}
           {...register('note')}
         />
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
-        <button
-          type="button"
-          onClick={() =>
-            reset({
-              subType: 'generalWaste',
-              weight: 0,
-              occurredAt: todayStr,
-              note: '',
-            })
-          }
-          className="px-5 py-2.5 text-xs font-semibold rounded-xl border border-border-default hover:bg-bg-elevated text-text-primary transition-all cursor-pointer"
-        >
-          Clear Fields
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2.5 text-xs font-bold rounded-xl bg-accent-primary hover:bg-accent-primary/90 text-white transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {isSubmitting ? (
-            <>
-              <Icons.Loader className="w-4 h-4 animate-spin" />
-              <span>Saving Log...</span>
-            </>
-          ) : (
-            <>
-              <Icons.PlusCircle className="w-4 h-4" />
-              <span>Log Waste</span>
-            </>
-          )}
-        </button>
-      </div>
+      {!hideActions && (
+        <div className="mt-auto flex items-center justify-end gap-3 border-t border-border-subtle pt-3">
+          <button
+            type="button"
+            onClick={() =>
+              reset({
+                subType: 'landfillWaste',
+                weight: 0,
+                occurredAt: todayStr,
+                note: '',
+              })
+            }
+            className="inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-border-default px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25"
+          >
+            Clear Fields
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Icons.Loader className="w-4 h-4 animate-spin" />
+                <span>Saving Log…</span>
+              </>
+            ) : (
+              <>
+                <Icons.PlusCircle className="w-4 h-4" />
+                <span>Log Waste</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </form>
   );
 }

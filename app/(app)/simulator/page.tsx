@@ -22,6 +22,14 @@ export default async function SimulatorPage() {
   // Fetch active emission factors from the database
   const factors = await prisma.emissionFactor.findMany({
     where: { isActive: true },
+    select: {
+      id: true,
+      category: true,
+      subType: true,
+      unit: true,
+      factor: true,
+      region: true,
+    },
   });
 
   const serializedFactors = factors.map((f) => ({
@@ -45,6 +53,16 @@ export default async function SimulatorPage() {
     },
     orderBy: {
       occurredAt: 'desc',
+    },
+    select: {
+      id: true,
+      category: true,
+      subType: true,
+      quantity: true,
+      unit: true,
+      co2eKg: true,
+      note: true,
+      occurredAt: true,
     },
   });
 
@@ -73,7 +91,7 @@ export default async function SimulatorPage() {
     : null;
 
   return (
-    <div className="space-y-6 w-full flex flex-col min-h-0 pb-10">
+    <div className="flex min-h-0 w-full flex-col gap-6 pb-6">
       <PageHeader
         title="Lifestyle Change Simulator"
         description="Model hypothetical choices in transport, diet, energy, shopping, and waste to see your potential CO₂e offset."

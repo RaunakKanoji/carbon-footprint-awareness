@@ -4,14 +4,17 @@ import { NextRequest } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
 
+/**
+ * Lightweight auth check — only verifies the JWT via auth().
+ * Does NOT call clerkClient (avoids an expensive external API round-trip).
+ * Use this in API routes that just need to confirm the user is signed in.
+ */
 export async function requireAuth(_req?: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
     throw new Error('Unauthorized');
   }
-  const client = await clerkClient();
-  const user = await client.users.getUser(userId);
-  return user;
+  return { userId };
 }
 
 export async function getCurrentUser() {

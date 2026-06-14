@@ -28,20 +28,24 @@ export default function AppTopbar() {
           </span>
           <input
             type="text"
-            placeholder="Search footprints, tips..."
-            className="w-full pl-9 pr-4 py-1.5 text-xs bg-bg-base border border-border-default rounded-lg text-text-primary placeholder:text-text-faint focus:outline-none focus:ring-1 focus:ring-accent-primary transition-all"
+            name="global-search"
+            aria-label="Search"
+            placeholder="Search footprints, tips…"
+            autoComplete="off"
+            className="w-full rounded-xl border border-border-default bg-bg-base py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted transition-colors focus-visible:border-accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
             disabled
           />
         </div>
 
         {/* Notifications Mock */}
         <button
-          className="p-2 rounded-lg text-text-secondary hover:bg-bg-elevated hover:text-text-primary relative transition-all"
+          className="relative rounded-xl p-2 text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
+          aria-label="Notifications"
           title="Notifications (Coming Soon)"
           disabled
         >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent-primary rounded-full"></span>
+          <Bell className="w-5 h-5" aria-hidden="true" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent-primary rounded-full" />
         </button>
 
         {/* User Button - Mobile only */}

@@ -9,7 +9,7 @@ import {
   getChallengeProgress,
 } from '@/lib/challenges';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser, requireAuth } from '@/src/lib/auth';
+import { getCurrentUser } from '@/src/lib/auth';
 
 // POST schema validation
 const joinChallengeSchema = z.object({
@@ -24,18 +24,9 @@ const updateChallengeSchema = z.object({
 
 export async function GET() {
   try {
-    try {
-      await requireAuth();
-    } catch {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
     const dbUser = await getCurrentUser();
     if (!dbUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = dbUser.id;
@@ -105,18 +96,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    try {
-      await requireAuth();
-    } catch {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
     const dbUser = await getCurrentUser();
     if (!dbUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = dbUser.id;
@@ -189,18 +171,9 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    try {
-      await requireAuth();
-    } catch {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
     const dbUser = await getCurrentUser();
     if (!dbUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = dbUser.id;

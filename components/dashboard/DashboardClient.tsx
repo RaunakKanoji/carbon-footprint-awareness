@@ -13,7 +13,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -102,9 +102,13 @@ export default function DashboardClient({
   }
 
   // Find highest weekly category for suggestion
-  const highestCategoryObj = categoryShare.reduce(
-    (max, item) => (item.co2eKg > max.co2eKg ? item : max),
-    { category: '', co2eKg: 0 },
+  const highestCategoryObj = useMemo(
+    () =>
+      categoryShare.reduce(
+        (max, item) => (item.co2eKg > max.co2eKg ? item : max),
+        { category: '', co2eKg: 0 },
+      ),
+    [categoryShare],
   );
 
   let recommendationText =
@@ -143,16 +147,20 @@ export default function DashboardClient({
   }
 
   // Filter out zero categories for pie chart representation
-  const pieData = categoryShare
-    .filter((item) => item.co2eKg > 0)
-    .map((item) => ({
-      name: item.category.charAt(0) + item.category.slice(1).toLowerCase(),
-      value: Number(item.co2eKg.toFixed(2)),
-      color: CATEGORY_COLORS[item.category] || '#94a3b8',
-    }));
+  const pieData = useMemo(
+    () =>
+      categoryShare
+        .filter((item) => item.co2eKg > 0)
+        .map((item) => ({
+          name: item.category.charAt(0) + item.category.slice(1).toLowerCase(),
+          value: Number(item.co2eKg.toFixed(2)),
+          color: CATEGORY_COLORS[item.category] || '#94a3b8',
+        })),
+    [categoryShare],
+  );
 
   return (
-    <div className="w-full space-y-6">
+    <div className="flex min-h-0 w-full flex-col gap-6 pb-6">
       <PageHeader
         title="Dashboard"
         description="View your carbon footprint summary, monthly budgets, and actionable goals."
@@ -161,7 +169,7 @@ export default function DashboardClient({
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Today's Card */}
-        <Card className="hover:shadow-md transition-all duration-200 border-border-default/60">
+        <Card className="border-border-default/60 transition-shadow duration-200 hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
               Today&apos;s Footprint
@@ -178,7 +186,7 @@ export default function DashboardClient({
         </Card>
 
         {/* Weekly Card */}
-        <Card className="hover:shadow-md transition-all duration-200 border-border-default/60">
+        <Card className="border-border-default/60 transition-shadow duration-200 hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
               Weekly Footprint
@@ -210,7 +218,7 @@ export default function DashboardClient({
         </Card>
 
         {/* Target Card */}
-        <Card className="hover:shadow-md transition-all duration-200 border-border-default/60">
+        <Card className="border-border-default/60 transition-shadow duration-200 hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
               Monthly Target
@@ -227,13 +235,13 @@ export default function DashboardClient({
         </Card>
 
         {/* Remaining Budget Card */}
-        <Card className="hover:shadow-md transition-all duration-200 border-border-default/60 relative overflow-hidden">
+        <Card className="relative border-border-default/60 transition-shadow duration-200 hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
               Remaining Budget
             </CardTitle>
             <span
-              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${budgetBadgeColor}`}
+              className={`inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold ${budgetBadgeColor}`}
             >
               {budgetStatusText}
             </span>
@@ -245,7 +253,7 @@ export default function DashboardClient({
             </div>
             <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5">
               <div
-                className={`h-1.5 rounded-full transition-all duration-500 ${budgetProgressBarColor}`}
+                className={`h-1.5 rounded-full transition-[width] duration-500 ${budgetProgressBarColor}`}
                 style={{ width: `${Math.min(Math.max(budgetRatio * 100, 0), 100)}%` }}
               />
             </div>
@@ -265,11 +273,16 @@ export default function DashboardClient({
               Emission values (kg CO₂e) tracked across categories over the last 7 days.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-2">
+          <CardContent className="overflow-visible pt-2">
             {mounted ? (
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full overflow-visible">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={weeklyLogs} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <BarChart
+                    data={weeklyLogs}
+                    barCategoryGap="20%"
+                    barGap={4}
+                    margin={{ top: 10, right: 16, left: 12, bottom: 8 }}
+                  >
                     <XAxis
                       dataKey="date"
                       stroke="#888888"
@@ -278,6 +291,7 @@ export default function DashboardClient({
                       axisLine={false}
                     />
                     <YAxis
+                      width={70}
                       stroke="#888888"
                       fontSize={11}
                       tickLine={false}
@@ -342,7 +356,7 @@ export default function DashboardClient({
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-text-secondary text-sm">
-                Loading charts...
+                Loading charts…
               </div>
             )}
           </CardContent>
@@ -371,7 +385,7 @@ export default function DashboardClient({
                           cy="50%"
                           innerRadius={60}
                           outerRadius={80}
-                          paddingAngle={3}
+                          paddingAngle={2}
                           dataKey="value"
                         >
                           {pieData.map((entry, index) => (
@@ -412,14 +426,14 @@ export default function DashboardClient({
                 </div>
               )
             ) : (
-              <div className="text-text-secondary text-sm">Loading details...</div>
+              <div className="text-sm text-text-secondary">Loading details…</div>
             )}
           </CardContent>
         </Card>
       </div>
 
       {/* Suggestion Panel and Recent Activities Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 pb-6 lg:grid-cols-3">
         {/* Context-aware suggestions block */}
         <Card className="hover:shadow-md transition-shadow duration-200 border-border-default/60 flex flex-col justify-between">
           <CardHeader>
@@ -523,10 +537,10 @@ export default function DashboardClient({
                               )}
                             </div>
                           </td>
-                          <td className="py-3 text-right text-text-secondary">
+                          <td className="py-3 text-right text-text-secondary tabular-nums">
                             {log.quantity.toFixed(1)} {log.unit}
                           </td>
-                          <td className="py-3 text-right font-semibold text-text-primary">
+                          <td className="py-3 text-right font-semibold text-text-primary tabular-nums">
                             {log.co2eKg.toFixed(2)}
                           </td>
                         </tr>

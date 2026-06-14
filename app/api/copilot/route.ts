@@ -4,27 +4,20 @@ import { NextResponse } from 'next/server';
 
 import { ConversationRole } from '@/app/generated/prisma';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser, requireAuth } from '@/src/lib/auth';
+import { getCurrentUser } from '@/src/lib/auth';
 
 const copilotPostSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty'),
   conversationId: z.string().optional(),
 });
 
+const COPILOT_MAX_OUTPUT_TOKENS = 3000;
+
 export async function POST(req: Request) {
   try {
-    try {
-      await requireAuth();
-    } catch {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
     const dbUser = await getCurrentUser();
     if (!dbUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -111,7 +104,7 @@ export async function POST(req: Request) {
       }
     } else {
       // Create new conversation
-      const previewText = message.length > 30 ? message.substring(0, 30) + '...' : message;
+      const previewText = message.length > 30 ? `${message.substring(0, 30)}…` : message;
       conversation = await prisma.conversation.create({
         data: {
           userId: dbUser.id,
@@ -175,7 +168,7 @@ User's current calendar month emissions:
                   parts: [{ text: systemPrompt }],
                 },
                 generationConfig: {
-                  maxOutputTokens: 1000,
+                  maxOutputTokens: COPILOT_MAX_OUTPUT_TOKENS,
                   temperature: 0.7,
                 },
               }),
@@ -232,7 +225,10 @@ User's current calendar month emissions:
                     if (braceCount === 0 && buffer.trim().startsWith('{')) {
                       try {
                         const parsed = JSON.parse(buffer);
-                        const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        const parts = parsed.candidates?.[0]?.content?.parts;
+                        const text = Array.isArray(parts)
+                          ? parts.map((part) => part.text || '').join('')
+                          : '';
                         if (text) {
                           fullText += text;
                           controller.enqueue(encoder.encode(text));
@@ -299,7 +295,7 @@ User's current calendar month emissions:
                   ...history,
                   { role: 'user', content: message },
                 ],
-                max_tokens: 1000,
+                max_tokens: COPILOT_MAX_OUTPUT_TOKENS,
                 temperature: 0.7,
               }),
             });
@@ -408,9 +404,8 @@ async function persistMessages(
 
 export async function GET(req: Request) {
   try {
-    try {
-      await requireAuth();
-    } catch {
+    const dbUser = await getCurrentUser();
+    if (!dbUser) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -421,14 +416,6 @@ export async function GET(req: Request) {
       return NextResponse.json(
         { success: false, error: 'conversationId query param is required' },
         { status: 400 },
-      );
-    }
-
-    const dbUser = await getCurrentUser();
-    if (!dbUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 401 },
       );
     }
 

@@ -1,9 +1,21 @@
+import { redirect } from 'next/navigation';
 import React from 'react';
 
 import FeatureCard from '@/components/landing/feature-card';
 import LandingHero from '@/components/landing/landing-hero';
+import { getCurrentUser } from '@/src/lib/auth';
 
-export default function RootLandingPage() {
+export default async function RootLandingPage() {
+  const dbUser = await getCurrentUser();
+
+  if (dbUser) {
+    if (dbUser.profile?.onboardingComplete) {
+      redirect('/dashboard');
+    } else {
+      redirect('/onboarding');
+    }
+  }
+
   const features = [
     {
       title: 'Daily Carbon Tracking',
@@ -37,7 +49,7 @@ export default function RootLandingPage() {
       <LandingHero />
 
       {/* Features Showcase Grid */}
-      <section id="features" className="w-full max-w-5xl px-6 pb-24 space-y-12">
+      <section id="features" className="w-full max-w-5xl px-6 pb-6 space-y-12">
         <div className="text-center space-y-3">
           <h2 className="text-3xl font-bold tracking-tight text-text-primary">
             Smarter Carbon Reduction
