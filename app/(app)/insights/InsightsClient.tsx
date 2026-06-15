@@ -60,6 +60,24 @@ interface InsightsClientProps {
 
 type TimeRange = '30d' | '90d' | '12m';
 
+const getStartOfDay = (date: Date) => {
+  const day = new Date(date);
+  day.setHours(0, 0, 0, 0);
+  return day;
+};
+
+const getEndOfDay = (date: Date) => {
+  const day = new Date(date);
+  day.setHours(23, 59, 59, 999);
+  return day;
+};
+
+const addDays = (date: Date, days: number) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
 export default function InsightsClient({ initialLogs }: InsightsClientProps) {
   const [range, setRange] = useState<TimeRange>('30d');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
@@ -81,34 +99,35 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
     let previousPeriodStart: Date;
     let daysCount = 30;
 
-    const baseDate = new Date(now);
+    const todayStart = getStartOfDay(now);
+    const currentPeriodEnd = getEndOfDay(now);
 
     if (range === '30d') {
       daysCount = 30;
-      currentPeriodStart = new Date(baseDate.getTime() - 30 * 24 * 60 * 60 * 1000);
-      previousPeriodStart = new Date(baseDate.getTime() - 60 * 24 * 60 * 60 * 1000);
+      currentPeriodStart = addDays(todayStart, -29);
+      previousPeriodStart = addDays(currentPeriodStart, -30);
     } else if (range === '90d') {
       daysCount = 90;
-      currentPeriodStart = new Date(baseDate.getTime() - 90 * 24 * 60 * 60 * 1000);
-      previousPeriodStart = new Date(baseDate.getTime() - 180 * 24 * 60 * 60 * 1000);
+      currentPeriodStart = addDays(todayStart, -89);
+      previousPeriodStart = addDays(currentPeriodStart, -90);
     } else {
       // '12m'
       daysCount = 365;
-      currentPeriodStart = new Date(baseDate.getTime() - 365 * 24 * 60 * 60 * 1000);
-      previousPeriodStart = new Date(baseDate.getTime() - 730 * 24 * 60 * 60 * 1000);
+      currentPeriodStart = addDays(todayStart, -364);
+      previousPeriodStart = addDays(currentPeriodStart, -365);
     }
 
-    return { currentPeriodStart, previousPeriodStart, daysCount };
+    return { currentPeriodStart, currentPeriodEnd, previousPeriodStart, daysCount };
   }, [range, now]);
 
   // Filter logs based on date range and category
   const filteredData = useMemo(() => {
-    const { currentPeriodStart, previousPeriodStart } = boundaries;
+    const { currentPeriodStart, currentPeriodEnd, previousPeriodStart } = boundaries;
 
     // Filter by dates
     const currentLogs = initialLogs.filter((log) => {
       const logDate = new Date(log.occurredAt);
-      return logDate >= currentPeriodStart && logDate <= now;
+      return logDate >= currentPeriodStart && logDate <= currentPeriodEnd;
     });
 
     const previousLogs = initialLogs.filter((log) => {
@@ -125,7 +144,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
         previousLogs: previousLogs.filter((log) => log.category === categoryFilter),
       };
     }
-  }, [initialLogs, boundaries, categoryFilter, now]);
+  }, [initialLogs, boundaries, categoryFilter]);
 
   const { currentLogs, previousLogs } = filteredData;
 
@@ -353,7 +372,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
         />
         <div className="h-96 flex items-center justify-center text-text-muted text-sm">
           <Activity className="animate-spin h-5 w-5 mr-2" />
-          Loading footprint analysis...
+          Loading footprint analysis…
         </div>
       </div>
     );
@@ -361,58 +380,45 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
 
   return (
     <div className="space-y-6">
-      {/* Page Header — border-b wraps the full row so the divider spans full width */}
-      <section className="border-b border-border-default pb-5">
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* Title block */}
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight text-text-primary">Footprint Insights</h1>
-              <span className="inline-flex items-center rounded-full bg-accent-primary-dim px-2.5 py-0.5 text-xs font-semibold text-accent-primary border border-accent-primary/20">
-                Analytics
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-text-secondary">
-              Explore detailed analysis and trend histories of your carbon impact.
-            </p>
-          </div>
+      <PageHeader
+        title="Footprint Insights"
+        description="Explore detailed analysis and trend histories of your carbon impact."
+        badge="Analytics"
+      />
 
-          {/* Filters */}
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            {/* Time Range Select */}
-            <div className="relative">
-              <Filter className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
-              <select
-                value={range}
-                onChange={(e) => setRange(e.target.value as TimeRange)}
-                className="h-8 appearance-none rounded-lg border border-border-default/60 bg-bg-surface pl-7 pr-8 text-xs font-semibold text-text-primary shadow-xs transition-colors hover:bg-bg-elevated focus:outline-none focus:ring-2 focus:ring-accent-primary/30 cursor-pointer"
-              >
-                <option value="30d">Last 30 Days</option>
-                <option value="90d">Last 90 Days</option>
-                <option value="12m">Last 12 Months</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
-            </div>
-
-            {/* Category Select */}
-            <div className="relative">
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="h-8 appearance-none rounded-lg border border-border-default/60 bg-bg-surface pl-3 pr-8 text-xs font-semibold text-text-primary shadow-xs transition-colors hover:bg-bg-elevated focus:outline-none focus:ring-2 focus:ring-accent-primary/30 cursor-pointer"
-              >
-                <option value="ALL">All Categories</option>
-                <option value="TRANSPORT">Transport</option>
-                <option value="FOOD">Food</option>
-                <option value="ENERGY">Energy</option>
-                <option value="SHOPPING">Shopping</option>
-                <option value="WASTE">Waste</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
-            </div>
-          </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative">
+          <Filter className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+          <select
+            value={range}
+            onChange={(e) => setRange(e.target.value as TimeRange)}
+            aria-label="Insight Time Range"
+            className="h-8 cursor-pointer appearance-none rounded-lg border border-border-default/60 bg-bg-surface pl-7 pr-8 text-xs font-semibold text-text-primary shadow-xs transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/30"
+          >
+            <option value="30d">Last 30 Days</option>
+            <option value="90d">Last 90 Days</option>
+            <option value="12m">Last 12 Months</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
         </div>
-      </section>
+
+        <div className="relative">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            aria-label="Insight Category Filter"
+            className="h-8 cursor-pointer appearance-none rounded-lg border border-border-default/60 bg-bg-surface pl-3 pr-8 text-xs font-semibold text-text-primary shadow-xs transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/30"
+          >
+            <option value="ALL">All Categories</option>
+            <option value="TRANSPORT">Transport</option>
+            <option value="FOOD">Food</option>
+            <option value="ENERGY">Energy</option>
+            <option value="SHOPPING">Shopping</option>
+            <option value="WASTE">Waste</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+        </div>
+      </div>
 
       {/* Metrics Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -503,7 +509,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
       </div>
 
       {/* Main Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Trend line chart */}
         <Card className="lg:col-span-2 border-border-default/50 shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -526,7 +532,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
               {showTable ? 'Hide Data' : 'View Data'}
             </Button>
           </CardHeader>
-          <CardContent className="pt-2">
+          <CardContent className="overflow-visible pt-2">
             {currentLogs.length === 0 ? (
               <div className="h-[280px] flex flex-col items-center justify-center text-center p-4">
                 <Activity className="h-8 w-8 text-text-muted mb-2 animate-pulse" />
@@ -558,11 +564,11 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                 </table>
               </div>
             ) : (
-              <div className="h-[280px] w-full">
+              <div className="h-[280px] w-full overflow-visible">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={trendChartData}
-                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    margin={{ top: 10, right: 16, left: 12, bottom: 8 }}
                   >
                     <defs>
                       <linearGradient id="colorEmissions" x1="0" y1="0" x2="0" y2="1">
@@ -579,6 +585,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                       axisLine={false}
                     />
                     <YAxis
+                      width={70}
                       stroke="#888888"
                       fontSize={11}
                       tickLine={false}
@@ -635,9 +642,9 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                         data={categoryShareData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={50}
-                        outerRadius={70}
-                        paddingAngle={3}
+                        innerRadius={48}
+                        outerRadius={68}
+                        paddingAngle={2}
                         dataKey="value"
                       >
                         {categoryShareData.map((entry, index) => (
@@ -656,7 +663,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                 </div>
 
                 {/* Pie chart legend */}
-                <div className="grid grid-cols-2 gap-2 text-[10px] mt-2 overflow-y-auto max-h-[85px] pt-1">
+                <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 pt-1 text-xs">
                   {categoryShareData.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-1.5">
                       <span
@@ -677,12 +684,12 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
       </div>
 
       {/* Subtypes & Heatmap grid row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 pb-6 lg:grid-cols-3">
         {/* Top Contributing Subtypes */}
         <Card className="border-border-default/50 shadow-xs">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-text-primary flex items-center">
-              <Info className="w-4 h-4 text-purple-500 mr-1.5" />
+              <Info className="w-4 h-4 text-accent-primary mr-1.5" />
               Top Carbon Drivers
             </CardTitle>
             <CardDescription className="text-xs text-text-secondary">
@@ -707,9 +714,9 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                         </span>
                         <span className="text-text-secondary text-right">{item.emissions} kg</span>
                       </div>
-                      <div className="w-full bg-zinc-150 dark:bg-zinc-800 rounded-full h-2">
+                      <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2">
                         <div
-                          className="h-full rounded-full transition-all duration-500"
+                          className="h-full rounded-full transition-[width] duration-500"
                           style={{ width: `${pct}%`, backgroundColor: item.color }}
                         />
                       </div>
@@ -732,17 +739,19 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
               Emissions split comparing weekdays versus weekends.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-2">
+          <CardContent className="overflow-visible pt-2">
             {currentLogs.length === 0 ? (
               <div className="h-[200px] flex items-center justify-center text-text-muted text-xs">
                 No activity logs available
               </div>
             ) : (
-              <div className="h-[200px] w-full">
+              <div className="h-[200px] w-full overflow-visible">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={weekdayWeekendData}
-                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    barCategoryGap="20%"
+                    barGap={4}
+                    margin={{ top: 10, right: 16, left: 0, bottom: 8 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                     <XAxis
@@ -753,6 +762,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                       axisLine={false}
                     />
                     <YAxis
+                      width={52}
                       stroke="#888888"
                       fontSize={11}
                       tickLine={false}
@@ -760,7 +770,13 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                       tickFormatter={(val) => `${val}kg`}
                     />
                     <Tooltip />
-                    <Bar dataKey="emissions" name="CO₂e" fill="#10b981" radius={[4, 4, 0, 0]}>
+                    <Bar
+                      dataKey="emissions"
+                      name="CO₂e"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                      barSize={24}
+                    >
                       {weekdayWeekendData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#3b82f6'} />
                       ))}
@@ -799,7 +815,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                           <div
                             key={dayIdx}
                             title={getHeatmapTitle(day)}
-                            className={`w-3.5 h-3.5 rounded-sm transition-all duration-200 cursor-help hover:ring-2 hover:ring-zinc-400 hover:ring-offset-1 ${getHeatmapColor(
+                            className={`w-3.5 h-3.5 rounded-sm transition-[background-color,box-shadow] duration-200 cursor-help hover:ring-2 hover:ring-zinc-400 hover:ring-offset-1 ${getHeatmapColor(
                               day.emissions,
                             )}`}
                           />
@@ -810,7 +826,7 @@ export default function InsightsClient({ initialLogs }: InsightsClientProps) {
                 </div>
 
                 {/* Heatmap Legend */}
-                <div className="flex items-center gap-1.5 justify-end text-[9px] text-text-muted mt-3">
+                <div className="mt-3 flex items-center justify-end gap-1.5 text-xs text-text-muted">
                   <span>Less</span>
                   <span className="w-2.5 h-2.5 rounded-xs bg-zinc-100 dark:bg-zinc-800/40 border border-zinc-200/5" />
                   <span className="w-2.5 h-2.5 rounded-xs bg-emerald-100 dark:bg-emerald-950/30" />

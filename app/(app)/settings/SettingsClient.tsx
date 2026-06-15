@@ -18,6 +18,9 @@ interface SettingsClientProps {
   initialBudgets: BudgetRecord[];
 }
 
+const fieldClassName =
+  'w-full rounded-xl border border-border-default bg-bg-base px-4 py-2.5 text-sm text-text-primary transition-colors placeholder:text-text-muted focus-visible:border-accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-50';
+
 export default function SettingsClient({ initialBudgets }: SettingsClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -55,7 +58,9 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
     const now = new Date();
     const currentMonthUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     const recordDate = new Date(isoString);
-    const recordMonthUTC = new Date(Date.UTC(recordDate.getUTCFullYear(), recordDate.getUTCMonth(), 1));
+    const recordMonthUTC = new Date(
+      Date.UTC(recordDate.getUTCFullYear(), recordDate.getUTCMonth(), 1),
+    );
 
     if (recordMonthUTC.getTime() === currentMonthUTC.getTime()) return 'Active';
     if (recordMonthUTC.getTime() < currentMonthUTC.getTime()) return 'Archived';
@@ -114,9 +119,7 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
         timeZone: 'UTC',
       }).format(labelDate);
 
-      setSuccessMsg(
-        `Successfully configured budget of ${parsedTarget} kg CO₂e for ${monthLabel}!`,
-      );
+      setSuccessMsg(`Successfully configured budget of ${parsedTarget} kg CO₂e for ${monthLabel}!`);
 
       // Refresh server component data
       startTransition(() => {
@@ -131,7 +134,7 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full pb-12 animate-fade-in">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full animate-fade-in">
       {/* Left Columns: Form Container */}
       <div className="lg:col-span-1 space-y-6">
         <Card className="hover:shadow-md transition-shadow duration-200 border-border-default/60 bg-bg-surface">
@@ -159,7 +162,7 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
                   type="month"
                   value={month}
                   onChange={(e) => setMonth(e.target.value)}
-                  className="w-full px-4 py-2 text-sm bg-bg-base border border-border-default rounded-xl text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary transition-all cursor-pointer"
+                  className={`${fieldClassName} cursor-pointer`}
                   required
                 />
               </div>
@@ -181,7 +184,7 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
                     placeholder="e.g. 500"
                     value={targetKg}
                     onChange={(e) => setTargetKg(e.target.value)}
-                    className="w-full px-4 py-2 pr-16 text-sm bg-bg-base border border-border-default rounded-xl text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary transition-all"
+                    className={`${fieldClassName} pr-16`}
                     required
                   />
                   <span className="absolute right-4 text-xs font-semibold text-text-muted">
@@ -215,13 +218,13 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
               <button
                 type="submit"
                 disabled={isSubmitting || isPending}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-accent-primary hover:bg-accent-primary/95 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-accent-primary px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
                 id="budget-submit-button"
               >
                 {isSubmitting || isPending ? (
                   <>
                     <Icons.Loader className="w-4 h-4 animate-spin" />
-                    <span>Saving Target...</span>
+                    <span>Saving Target…</span>
                   </>
                 ) : (
                   <>
@@ -266,30 +269,30 @@ export default function SettingsClient({ initialBudgets }: SettingsClientProps) 
                       return (
                         <tr
                           key={budgetRecord.id}
-                          className={`hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors ${
-                            isActive ? 'bg-emerald-500/5 dark:bg-emerald-500/10 font-semibold' : ''
+                          className={`transition-colors hover:bg-bg-elevated/60 ${
+                            isActive ? 'bg-emerald-500/5 font-semibold' : ''
                           }`}
                         >
-                          <td className="py-3.5 px-4 flex items-center gap-2 text-text-primary">
+                          <td className="flex items-center gap-2 px-4 py-3 text-text-primary">
                             <Icons.Calendar className="w-4 h-4 text-text-secondary shrink-0" />
                             <span>{formatMonth(budgetRecord.month)}</span>
                           </td>
-                          <td className="py-3.5 px-4 text-right text-text-primary">
+                          <td className="px-4 py-3 text-right text-text-primary tabular-nums">
                             {budgetRecord.targetKg.toFixed(0)} kg CO₂e
                           </td>
-                          <td className="py-3.5 px-4 text-right">
+                          <td className="px-4 py-3 text-right">
                             {status === 'Active' && (
-                              <span className="inline-flex items-center rounded-full border border-accent-primary/20 bg-accent-primary-dim px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-primary">
+                              <span className="inline-flex items-center rounded-full border border-accent-primary/20 bg-accent-primary-dim px-2.5 py-0.5 text-xs font-semibold text-accent-primary">
                                 Active
                               </span>
                             )}
                             {status === 'Archived' && (
-                              <span className="inline-flex items-center rounded-full border border-border-default bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-text-secondary">
+                              <span className="inline-flex items-center rounded-full border border-border-default bg-bg-elevated px-2.5 py-0.5 text-xs font-semibold text-text-secondary">
                                 Archived
                               </span>
                             )}
                             {status === 'Upcoming' && (
-                              <span className="inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-600">
+                              <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
                                 Upcoming
                               </span>
                             )}

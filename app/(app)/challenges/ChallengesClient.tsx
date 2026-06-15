@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/toast-provider';
 import Icon from '@/src/components/Icon';
 import { iconMap } from '@/src/lib/icons';
 
@@ -57,6 +58,7 @@ export default function ChallengesClient({
   initialCompleted,
   initialAvailable,
 }: ChallengesClientProps) {
+  const { toast } = useToast();
   const [activeChallenges, setActiveChallenges] = useState<Challenge[]>(initialActive);
   const [completedChallenges, setCompletedChallenges] = useState<Challenge[]>(initialCompleted);
   const [availableTemplates, setAvailableTemplates] = useState<Template[]>(initialAvailable);
@@ -97,32 +99,17 @@ export default function ChallengesClient({
     }
   }, [completedChallenges]);
 
-  // Calculate user total points (100 base onboarding points + completed challenges)
+  // Level is derived from real earned points. There is no persisted XP model yet,
+  // so completed challenge rewards plus the onboarding base determine progress.
   const completedPoints = completedChallenges.reduce((sum, c) => sum + c.points, 0);
   const totalPoints = 100 + completedPoints;
-
-  // Determine user level based on points
-  let userLevel = 'Eco Recruit';
-  let levelColor = 'text-zinc-500 bg-zinc-100 border-zinc-200';
-  let nextLevelPoints = 300;
-
-  if (totalPoints >= 500) {
-    userLevel = 'Carbon Master';
-    levelColor =
-      'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/20';
-    nextLevelPoints = 1000;
-  } else if (totalPoints >= 300) {
-    userLevel = 'Eco Warrior';
-    levelColor =
-      'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/20';
-    nextLevelPoints = 500;
-  } else if (totalPoints >= 150) {
-    userLevel = 'Green Scout';
-    levelColor = 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/20';
-    nextLevelPoints = 300;
-  }
-
-  const progressToNextLevel = Math.min(100, Math.round((totalPoints / nextLevelPoints) * 100));
+  const levelNumber = Math.floor(totalPoints / 500) + 1;
+  const currentLevelProgress = totalPoints % 500;
+  const pointsToNextLevel = 500 - currentLevelProgress;
+  const progressToNextLevel = Math.round((currentLevelProgress / 500) * 100);
+  const levelTitles = ['Eco Recruit', 'Green Scout', 'Eco Builder', 'Climate Strategist'];
+  const userLevel =
+    levelTitles[Math.min(levelNumber - 1, levelTitles.length - 1)] ?? 'Carbon Master';
 
   // Fetch updated challenges from API
   const refreshChallenges = async () => {
@@ -152,7 +139,11 @@ export default function ChallengesClient({
       if (data.success) {
         await refreshChallenges();
       } else {
-        alert(data.error || 'Failed to join challenge');
+        toast({
+          title: 'Could not join challenge',
+          description: data.error || 'Failed to join challenge.',
+          variant: 'destructive',
+        });
       }
     } catch (err) {
       console.error('Error joining challenge:', err);
@@ -181,7 +172,11 @@ export default function ChallengesClient({
       if (data.success) {
         await refreshChallenges();
       } else {
-        alert(data.error || 'Failed to abandon challenge');
+        toast({
+          title: 'Could not abandon challenge',
+          description: data.error || 'Failed to abandon challenge.',
+          variant: 'destructive',
+        });
       }
     } catch (err) {
       console.error('Error abandoning challenge:', err);
@@ -191,7 +186,7 @@ export default function ChallengesClient({
   };
 
   return (
-    <div className="space-y-6 w-full flex flex-col min-h-0 pb-10">
+    <div className="flex min-h-0 w-full flex-col gap-6 pb-6">
       <PageHeader
         title="Eco Challenges & Achievements"
         description="Pledge to sustainable challenges, monitor your progress, and earn achievements."
@@ -219,22 +214,31 @@ export default function ChallengesClient({
             <span className="text-text-muted text-xs uppercase tracking-wider font-semibold">
               Achievement Level
             </span>
-            <span
-              className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${levelColor}`}
-            >
-              {userLevel}
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400">
+              Level {levelNumber}
             </span>
           </div>
-          <div className="mt-3 space-y-1.5">
+          <div className="mt-3 space-y-2">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-lg font-extrabold leading-none text-text-primary">{userLevel}</p>
+                <p className="mt-1 text-xs font-semibold text-text-secondary tabular-nums">
+                  {totalPoints.toLocaleString()} XP
+                </p>
+              </div>
+              <p className="text-xs font-semibold text-accent-primary tabular-nums">
+                {pointsToNextLevel} XP to Level {levelNumber + 1}
+              </p>
+            </div>
             <div className="flex justify-between text-xs font-medium">
               <span className="text-text-secondary">Progress to Next Level</span>
-              <span className="text-text-primary">
-                {totalPoints} / {nextLevelPoints} pts
+              <span className="text-text-primary tabular-nums">
+                {currentLevelProgress} / 500 XP
               </span>
             </div>
             <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
               <div
-                className="bg-accent-primary h-full transition-all duration-500 rounded-full"
+                className="h-full rounded-full bg-accent-primary transition-[width] duration-500"
                 style={{ width: `${progressToNextLevel}%` }}
               />
             </div>
@@ -305,7 +309,7 @@ export default function ChallengesClient({
                             <CardTitle className="text-sm font-bold text-text-primary">
                               {challenge.title}
                             </CardTitle>
-                            <span className="text-[10px] font-bold text-accent-primary bg-accent-primary-dim px-2 py-0.5 rounded-full border border-accent-primary/10 inline-block mt-0.5">
+                            <span className="mt-1 inline-flex rounded-full border border-accent-primary/10 bg-accent-primary-dim px-2.5 py-0.5 text-xs font-semibold text-accent-primary">
                               {challenge.category}
                             </span>
                           </div>
@@ -329,14 +333,14 @@ export default function ChallengesClient({
                         </div>
                         <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
                           <div
-                            className="bg-accent-primary h-full transition-all duration-300 rounded-full"
+                            className="h-full rounded-full bg-accent-primary transition-[width] duration-300"
                             style={{ width: `${progress.percent}%` }}
                           />
                         </div>
                       </div>
                     </CardContent>
                     <CardFooter className="bg-zinc-50/50 p-4 border-t border-border-default/30 flex justify-between gap-4">
-                      <span className="text-[10px] text-text-muted">
+                      <span className="text-xs text-text-muted">
                         Started: {formatDate(challenge.startedAt)}
                       </span>
                       <Button
@@ -388,7 +392,7 @@ export default function ChallengesClient({
                           <CardTitle className="text-sm font-bold text-text-primary">
                             {template.title}
                           </CardTitle>
-                          <span className="text-[10px] font-bold text-text-muted bg-zinc-100 px-2 py-0.5 rounded-full border border-border-default/10 inline-block mt-0.5">
+                          <span className="mt-1 inline-flex rounded-full border border-border-default bg-bg-elevated px-2.5 py-0.5 text-xs font-semibold text-text-secondary">
                             {template.category}
                           </span>
                         </div>
@@ -402,7 +406,7 @@ export default function ChallengesClient({
                     <p className="text-xs text-text-secondary leading-relaxed">
                       {template.description}
                     </p>
-                    <div className="mt-4 bg-zinc-50 dark:bg-zinc-900/50 p-2.5 rounded-lg border border-border-default/50 text-[10px] text-text-muted">
+                    <div className="mt-4 rounded-xl border border-border-default/50 bg-bg-elevated/60 p-3 text-xs text-text-secondary">
                       Goal: Log at least{' '}
                       <strong className="text-text-primary font-semibold">
                         {template.targetCount} times
@@ -445,7 +449,7 @@ export default function ChallengesClient({
               {completedChallenges.map((challenge) => (
                 <Card
                   key={challenge.id}
-                  className="bg-bg-surface border-2 border-amber-500/30 dark:border-amber-500/20 shadow-sm rounded-xl p-4 flex flex-col items-center text-center relative group hover:border-amber-500/50 transition-all duration-300 overflow-hidden"
+                  className="group relative flex flex-col items-center overflow-hidden rounded-xl border-2 border-amber-500/30 bg-bg-surface p-4 text-center shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-amber-500/50 dark:border-amber-500/20"
                 >
                   {/* Glowing medal shine effect */}
                   <div className="absolute inset-0 bg-linear-to-tr from-amber-500/0 via-amber-500/5 to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -458,15 +462,15 @@ export default function ChallengesClient({
                   </div>
 
                   <h4 className="font-extrabold text-xs text-text-primary">{challenge.title}</h4>
-                  <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-500/10 mt-1 inline-block">
+                  <span className="mt-1 inline-flex rounded-full border border-amber-500/10 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-600">
                     {challenge.badgeName}
                   </span>
 
-                  <div className="text-[9px] text-text-muted mt-3">
+                  <div className="mt-3 text-xs text-text-muted">
                     Completed: {formatDate(challenge.completedAt)}
                   </div>
 
-                  <div className="text-[10px] font-bold text-amber-700 mt-1">
+                  <div className="mt-1 text-xs font-bold text-amber-700">
                     +{challenge.points} pts awarded
                   </div>
                 </Card>
@@ -481,43 +485,48 @@ export default function ChallengesClient({
         open={!!celebrationChallenge}
         onOpenChange={(open) => !open && setCelebrationChallenge(null)}
       >
-        <DialogContent className="sm:max-w-md bg-white border border-zinc-200 p-6">
-          <DialogHeader className="space-y-2 text-center flex flex-col items-center">
-            <div className="h-16 w-16 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20 mb-2 relative animate-bounce">
-              <Icon
-                icon={celebrationChallenge?.icon || 'tree'}
-                className="text-amber-500 h-8 w-8"
-              />
-              <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-amber-500 flex items-center justify-center border border-white text-white">
-                <Icon icon="leaf" className="h-3 w-3 text-white" />
+        <DialogContent className="max-h-[calc(100vh-2rem)] overflow-visible rounded-3xl border border-emerald-500/20 bg-white p-0 shadow-2xl sm:max-w-md">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-br from-emerald-500/15 via-amber-400/10 to-transparent" />
+          <div className="relative px-8 pb-6 pt-8">
+            <DialogHeader className="flex flex-col items-center space-y-2 text-center">
+              <div className="relative mb-2 flex h-16 w-16 items-center justify-center rounded-full border border-amber-500/20 bg-amber-500/10 shadow-lg shadow-amber-500/10">
+                <Icon
+                  icon={celebrationChallenge?.icon || 'tree'}
+                  className="text-amber-500 h-8 w-8"
+                />
+                <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-amber-500 flex items-center justify-center border border-white text-white">
+                  <Icon icon="leaf" className="h-3 w-3 text-white" />
+                </div>
               </div>
-            </div>
-            <DialogTitle className="flex items-center gap-2 text-amber-600 font-extrabold text-xl">
-              Badge Unlocked!
-            </DialogTitle>
-            <DialogDescription className="text-zinc-600 text-xs">
-              Incredible work! You&apos;ve completed the{' '}
-              <strong className="text-zinc-900 font-semibold">{celebrationChallenge?.title}</strong>{' '}
-              challenge and earned a new badge!
-            </DialogDescription>
-          </DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl font-extrabold text-amber-600">
+                Badge Unlocked!
+              </DialogTitle>
+              <DialogDescription className="text-sm text-text-secondary">
+                Incredible work. You completed{' '}
+                <strong className="font-semibold text-text-primary">
+                  {celebrationChallenge?.title}
+                </strong>{' '}
+                and earned a new badge.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-500/10 text-center space-y-2 mt-4">
-            <span className="text-lg font-black text-amber-700 uppercase tracking-widest block">
-              {celebrationChallenge?.badgeName}
-            </span>
-            <p className="text-xs text-amber-800 leading-relaxed font-medium">
-              &quot;{celebrationChallenge?.description}&quot;
-            </p>
-            <div className="text-sm font-black text-amber-600 animate-pulse pt-2">
-              +{celebrationChallenge?.points} Points Awarded!
+            <div className="mt-5 space-y-2 rounded-2xl border border-amber-500/10 bg-amber-50/70 p-4 text-center">
+              <span className="block text-lg font-black uppercase tracking-widest text-amber-700">
+                {celebrationChallenge?.badgeName}
+              </span>
+              <p className="text-sm font-medium leading-relaxed text-amber-800">
+                &quot;{celebrationChallenge?.description}&quot;
+              </p>
+              <div className="pt-2 text-sm font-black text-amber-600">
+                +{celebrationChallenge?.points} Points Awarded
+              </div>
             </div>
           </div>
 
-          <DialogFooter className="sm:justify-center mt-6">
+          <DialogFooter className="mx-0 mb-0 border-t border-emerald-500/10 bg-emerald-50/50 px-8 py-5 sm:justify-center">
             <DialogClose
               render={
-                <Button className="bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg px-6 py-2 text-xs" />
+                <Button className="h-10 w-full rounded-xl bg-accent-primary px-4 text-sm font-semibold text-white hover:bg-accent-primary/90" />
               }
             >
               Awesome!

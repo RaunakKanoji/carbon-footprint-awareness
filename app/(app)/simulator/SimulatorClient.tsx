@@ -67,6 +67,13 @@ const getProfileCommuteSubType = (mode: string): string => {
   return 'petrolCar';
 };
 
+const isZeroEmissionCommute = (mode: string): boolean => {
+  const m = mode.toUpperCase();
+  return (
+    m === 'REMOTE' || m === 'WORK_FROM_HOME' || m === 'WALK' || m === 'WALKING' || m === 'BICYCLE'
+  );
+};
+
 export default function SimulatorClient({ initialLogs, profile, factors }: SimulatorClientProps) {
   // SSR Safeguard
   const [isMounted, setIsMounted] = useState(false);
@@ -114,6 +121,22 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
     let transportBaseline = 0;
     let carDistance = 0;
     let transitDistance = 0;
+    const applyProfileTransportFallback = () => {
+      const mode = profile?.commuteMode || 'remote';
+      const distanceKm = profile?.commuteDistanceKm || 0;
+      const monthlyDistance = distanceKm * 2 * 22; // round-trip commute for 22 days
+
+      if (monthlyDistance > 0 && !isZeroEmissionCommute(mode)) {
+        const subType = getProfileCommuteSubType(mode);
+        const factor = getFactorValue('TRANSPORT', subType, 0.192);
+        transportBaseline = monthlyDistance * factor;
+        if (subType === 'petrolCar' || subType === 'dieselCar') {
+          carDistance = monthlyDistance;
+        } else {
+          transitDistance = monthlyDistance;
+        }
+      }
+    };
 
     if (transportLogs.length > 0) {
       transportBaseline = transportLogs.reduce((sum, l) => sum + l.co2eKg, 0);
@@ -136,30 +159,13 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
           transitDistance += l.quantity;
         }
       });
+
+      if (transportBaseline === 0) {
+        applyProfileTransportFallback();
+      }
     } else {
       // Fallback from profile data
-      const mode = profile?.commuteMode || 'remote';
-      const distanceKm = profile?.commuteDistanceKm || 0;
-      const monthlyDistance = distanceKm * 2 * 22; // round-trip commute for 22 days
-
-      if (
-        monthlyDistance > 0 &&
-        mode !== 'remote' &&
-        mode !== 'walking' &&
-        mode !== 'bicycle' &&
-        mode !== 'WORK_FROM_HOME' &&
-        mode !== 'WALK' &&
-        mode !== 'BICYCLE'
-      ) {
-        const subType = getProfileCommuteSubType(mode);
-        const factor = getFactorValue('TRANSPORT', subType, 0.192);
-        transportBaseline = monthlyDistance * factor;
-        if (subType === 'petrolCar' || subType === 'dieselCar') {
-          carDistance = monthlyDistance;
-        } else {
-          transitDistance = monthlyDistance;
-        }
-      }
+      applyProfileTransportFallback();
     }
 
     // FOOD
@@ -283,14 +289,30 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
     const carFactor = getFactorValue('TRANSPORT', 'petrolCar', 0.192);
     const busFactor = getFactorValue('TRANSPORT', 'bus', 0.105);
 
-    const drivingReduced = carDistance * (carReducePct / 100);
-    const drivingToTransit = drivingReduced * (publicTransitPct / 100);
-    const remainingDrivingDist = carDistance - drivingReduced;
+    const carEmissionsFromDistance = carDistance * carFactor;
+    const transitEmissionsFromDistance = transitDistance * busFactor;
+    const modeledTransportEmissions = carEmissionsFromDistance + transitEmissionsFromDistance;
+    const unmodeledTransportEmissions = Math.max(
+      0,
+      baseline.transport.baseline - modeledTransportEmissions,
+    );
+    const drivingBaseline =
+      carEmissionsFromDistance > 0 ? carEmissionsFromDistance : baseline.transport.baseline;
+    const originalTransitEmissions =
+      carEmissionsFromDistance > 0 ? transitEmissionsFromDistance : 0;
+    const reducedDrivingEmissions = drivingBaseline * (carReducePct / 100);
+    const shiftedTransitEmissions =
+      carFactor > 0
+        ? reducedDrivingEmissions * (publicTransitPct / 100) * (busFactor / carFactor)
+        : 0;
+    const remainingDrivingEmissions =
+      (drivingBaseline - reducedDrivingEmissions) / carpoolOccupancy;
 
-    const remainingDrivingEmissions = (remainingDrivingDist * carFactor) / carpoolOccupancy;
-    const transitEmissions = (transitDistance + drivingToTransit) * busFactor;
-
-    const transportSimulated = remainingDrivingEmissions + transitEmissions;
+    const transportSimulated =
+      unmodeledTransportEmissions +
+      originalTransitEmissions +
+      remainingDrivingEmissions +
+      shiftedTransitEmissions;
 
     // FOOD
     const { beefMeals, chickenMeals, vegetarianMeals, veganMeals } = baseline.food;
@@ -300,31 +322,48 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
     const veganFactor = getFactorValue('FOOD', 'veganMeal', 0.7);
 
     const monthlyReplacedMeals = plantMealsPerWeek * 4.33;
-    let remainingBeef = beefMeals;
-    let remainingChicken = chickenMeals;
-    let addedVegan = 0;
+    const animalMeals = beefMeals + chickenMeals;
+    let foodSimulated = baseline.food.baseline;
 
-    let mealsToReplace = monthlyReplacedMeals;
+    if (animalMeals > 0) {
+      let remainingBeef = beefMeals;
+      let remainingChicken = chickenMeals;
+      let addedVegan = 0;
 
-    if (mealsToReplace > 0) {
-      const beefReplaced = Math.min(mealsToReplace, remainingBeef);
-      remainingBeef -= beefReplaced;
-      addedVegan += beefReplaced;
-      mealsToReplace -= beefReplaced;
+      let mealsToReplace = monthlyReplacedMeals;
+
+      if (mealsToReplace > 0) {
+        const beefReplaced = Math.min(mealsToReplace, remainingBeef);
+        remainingBeef -= beefReplaced;
+        addedVegan += beefReplaced;
+        mealsToReplace -= beefReplaced;
+      }
+
+      if (mealsToReplace > 0) {
+        const chickenReplaced = Math.min(mealsToReplace, remainingChicken);
+        remainingChicken -= chickenReplaced;
+        addedVegan += chickenReplaced;
+        mealsToReplace -= chickenReplaced;
+      }
+
+      const modeledFood =
+        remainingBeef * beefFactor +
+        remainingChicken * chickenFactor +
+        vegetarianMeals * vegFactor +
+        (veganMeals + addedVegan) * veganFactor;
+      const originalModeledFood =
+        beefMeals * beefFactor +
+        chickenMeals * chickenFactor +
+        vegetarianMeals * vegFactor +
+        veganMeals * veganFactor;
+      foodSimulated = Math.max(
+        0,
+        baseline.food.baseline - Math.max(0, originalModeledFood - modeledFood),
+      );
+    } else {
+      const plantSwapIntensity = Math.min(plantMealsPerWeek / 21, 1);
+      foodSimulated = baseline.food.baseline * (1 - plantSwapIntensity * 0.5);
     }
-
-    if (mealsToReplace > 0) {
-      const chickenReplaced = Math.min(mealsToReplace, remainingChicken);
-      remainingChicken -= chickenReplaced;
-      addedVegan += chickenReplaced;
-      mealsToReplace -= chickenReplaced;
-    }
-
-    const foodSimulated =
-      remainingBeef * beefFactor +
-      remainingChicken * chickenFactor +
-      vegetarianMeals * vegFactor +
-      (veganMeals + addedVegan) * veganFactor;
 
     // ENERGY
     const { electricityKwh } = baseline.energy;
@@ -415,7 +454,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
   const strokeDashoffset = circumference - (Math.min(pctReduction, 100) / 100) * circumference;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
+    <div className="grid w-full grid-cols-1 items-start gap-6 pb-6 lg:grid-cols-12">
       {/* LEFT COLUMN: Controls tabbed layout */}
       <div className="lg:col-span-7 space-y-6">
         <Tabs
@@ -437,7 +476,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                   <span className="font-semibold text-sm">Transport</span>
                 </div>
                 {savingsTransport > 0 && (
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded-full border border-emerald-500/10">
+                  <span className="rounded-full border border-emerald-500/10 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-950/20">
                     -{savingsTransport.toFixed(0)} kg
                   </span>
                 )}
@@ -456,7 +495,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                   <span className="font-semibold text-sm">Diet</span>
                 </div>
                 {savingsFood > 0 && (
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded-full border border-emerald-500/10">
+                  <span className="rounded-full border border-emerald-500/10 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-950/20">
                     -{savingsFood.toFixed(0)} kg
                   </span>
                 )}
@@ -475,7 +514,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                   <span className="font-semibold text-sm">Energy</span>
                 </div>
                 {savingsEnergy > 0 && (
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded-full border border-emerald-500/10">
+                  <span className="rounded-full border border-emerald-500/10 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-950/20">
                     -{savingsEnergy.toFixed(0)} kg
                   </span>
                 )}
@@ -494,7 +533,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                   <span className="font-semibold text-sm">Shopping</span>
                 </div>
                 {savingsShopping > 0 && (
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded-full border border-emerald-500/10">
+                  <span className="rounded-full border border-emerald-500/10 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-950/20">
                     -{savingsShopping.toFixed(0)} kg
                   </span>
                 )}
@@ -513,7 +552,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                   <span className="font-semibold text-sm">Waste</span>
                 </div>
                 {savingsWaste > 0 && (
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded-full border border-emerald-500/10">
+                  <span className="rounded-full border border-emerald-500/10 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-950/20">
                     -{savingsWaste.toFixed(0)} kg
                   </span>
                 )}
@@ -775,7 +814,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                   <label className="text-sm font-semibold text-text-primary">
                     Choose Second-Hand
                   </label>
-                  <span className="text-xs font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-purple-600 bg-purple-500/10 px-2 py-0.5 rounded-full">
                     {secondHandPct}% second-hand
                   </span>
                 </div>
@@ -831,7 +870,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
             </TabsContent>
 
             {/* General bottom reset trigger */}
-            <div className="flex justify-end pt-4 border-t border-border-default/50">
+            <div className="mt-4 flex justify-end border-t border-border-default/50 pt-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -855,8 +894,8 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
         </Tabs>
       </div>
 
-      {/* RIGHT COLUMN: Results panel (Sticky on Desktop) */}
-      <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-6">
+      {/* RIGHT COLUMN: Results panel */}
+      <div className="space-y-6 lg:col-span-5 lg:self-start">
         {/* Main savings total Card */}
         <Card className="bg-linear-to-br from-emerald-600 to-teal-700 text-white border-0 shadow-lg relative overflow-hidden rounded-xl">
           {/* Subtle bg glow meshes */}
@@ -903,7 +942,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                     cx="48"
                     cy="48"
                     r={radius}
-                    className="text-emerald-300 transition-all duration-300 ease-out"
+                    className="text-emerald-300 transition-[stroke-dashoffset] duration-300 ease-out"
                     strokeWidth="6"
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeDashoffset}
@@ -922,13 +961,13 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
             {/* Baseline comparison split bar */}
             <div className="pt-2 border-t border-white/10 grid grid-cols-2 gap-2 text-center text-xs">
               <div className="border-r border-white/10 pr-2">
-                <span className="text-emerald-200 block text-[10px] uppercase font-bold tracking-wider">
+                <span className="block text-xs font-bold uppercase tracking-wider text-emerald-200">
                   Baseline
                 </span>
                 <span className="font-extrabold text-white">{baseline.total.toFixed(0)} kg</span>
               </div>
               <div className="pl-2">
-                <span className="text-emerald-200 block text-[10px] uppercase font-bold tracking-wider">
+                <span className="block text-xs font-bold uppercase tracking-wider text-emerald-200">
                   Simulated
                 </span>
                 <span className="font-extrabold text-emerald-300">
@@ -956,7 +995,9 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                 <BarChart
                   data={chartData}
                   layout="vertical"
-                  margin={{ top: 5, right: 5, left: 15, bottom: 5 }}
+                  barCategoryGap="20%"
+                  barGap={4}
+                  margin={{ top: 10, right: 16, left: 12, bottom: 8 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis type="number" stroke="#94a3b8" fontSize={10} tickLine={false} />
@@ -984,7 +1025,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
               </ResponsiveContainer>
             ) : (
               <div className="h-full w-full flex items-center justify-center text-xs text-text-muted">
-                Loading simulator chart...
+                Loading simulator chart…
               </div>
             )}
           </CardContent>
@@ -1009,7 +1050,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
               <span className="text-xs font-bold text-text-primary">
                 {equivalentTrees.toFixed(1)}
               </span>
-              <span className="text-[9px] text-text-muted mt-0.5 leading-tight">Trees planted</span>
+              <span className="mt-0.5 text-xs leading-tight text-text-muted">Trees planted</span>
             </div>
 
             <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2.5 rounded-lg border border-border-default/50 text-center flex flex-col items-center justify-center">
@@ -1019,9 +1060,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
               <span className="text-xs font-bold text-text-primary">
                 {equivalentKm.toFixed(0)} km
               </span>
-              <span className="text-[9px] text-text-muted mt-0.5 leading-tight">
-                Driving avoided
-              </span>
+              <span className="mt-0.5 text-xs leading-tight text-text-muted">Driving avoided</span>
             </div>
 
             <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2.5 rounded-lg border border-border-default/50 text-center flex flex-col items-center justify-center">
@@ -1031,20 +1070,22 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
               <span className="text-xs font-bold text-text-primary">
                 {equivalentBottles.toFixed(0)}
               </span>
-              <span className="text-[9px] text-text-muted mt-0.5 leading-tight">Bottles saved</span>
+              <span className="mt-0.5 text-xs leading-tight text-text-muted">Bottles saved</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Commit Button */}
-        <Button
-          onClick={() => setIsCommitOpen(true)}
-          className="w-full bg-accent-primary hover:bg-accent-primary/90 text-white font-semibold py-3.5 rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2"
-          disabled={savingsTotal === 0}
-        >
-          <Icon icon="leaf" className="text-white h-4 w-4" />
-          Commit to Lifestyle Changes
-        </Button>
+        <div className="pt-1">
+          <Button
+            onClick={() => setIsCommitOpen(true)}
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-accent-primary px-4 text-sm font-semibold text-white shadow-md transition-colors hover:bg-accent-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/25"
+            disabled={savingsTotal === 0}
+          >
+            <Icon icon="leaf" className="text-white h-4 w-4" />
+            Commit to Lifestyle Changes
+          </Button>
+        </div>
       </div>
 
       {/* COMMITMENT MODAL */}
@@ -1103,7 +1144,7 @@ export default function SimulatorClient({ initialLogs, profile, factors }: Simul
                 </li>
               )}
             </ul>
-            <p className="text-[10px] text-emerald-600 font-semibold mt-2 pt-1 border-t border-emerald-500/10">
+            <p className="mt-2 border-t border-emerald-500/10 pt-1 text-xs font-semibold text-emerald-600">
               * Note: These choices will prefill your Carbon Challenges and goals. Keep logging
               activities to realize these simulated offsets!
             </p>

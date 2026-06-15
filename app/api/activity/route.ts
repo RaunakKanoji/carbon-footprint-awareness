@@ -1,12 +1,13 @@
 import { z } from 'zod';
 
+import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 import { ActivityCategory } from '@/app/generated/prisma';
 import { calculateCo2e, getEmissionFactorInfo } from '@/lib/carbon-engine';
 import { checkAndCompleteChallenges } from '@/lib/challenges';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser, requireAuth } from '@/src/lib/auth';
+import { getCurrentUser } from '@/src/lib/auth';
 
 const activityPostSchema = z.object({
   category: z.string().min(1, 'Category is required'),
@@ -19,19 +20,10 @@ const activityPostSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    // Authenticate user
-    try {
-      await requireAuth();
-    } catch {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
+    // getCurrentUser handles both auth and DB lookup; returns null if not signed in
     const dbUser = await getCurrentUser();
     if (!dbUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     // Parse and validate request body
@@ -115,6 +107,11 @@ export async function POST(req: Request) {
 
     // Check for challenge progress completions
     const completedChallenges = await checkAndCompleteChallenges(dbUser.id);
+
+    revalidatePath('/dashboard');
+    revalidatePath('/insights');
+    revalidatePath('/profile');
+    revalidatePath('/challenges');
 
     return NextResponse.json(
       {

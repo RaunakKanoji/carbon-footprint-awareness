@@ -21,7 +21,7 @@ This document defines the high level structure, boundaries, storage model, and i
 The application is organised into clear directories representing different concerns. Respecting these boundaries prevents coupling between layers and keeps business logic testable.
 
 - `app/api` -- API route handlers and server actions. Responsible for input validation, authentication, authorisation, calling the carbon engine, persisting data via Prisma and triggering background jobs. API handlers must not perform long running AI calls.
-- `trigger` -- All Trigger.dev workflows. Encapsulates long running tasks such as AI prompt execution and scheduled jobs (for example monthly budget resets). These jobs are invoked from API routes or cron triggers and run independently of the request/response cycle.
+- `jobs` -- All Trigger.dev workflows and background tasks. Encapsulates long running tasks such as AI prompt execution and scheduled jobs (for example weekly summaries and budget reminders). These jobs are invoked from API routes or cron triggers and run independently of the request/response cycle.
 - `lib` -- Shared infrastructure and utilities. Includes the Prisma client, carbon engine functions, emission factor loading, validation schemas and helper hooks (for example `useCurrentUser`). The carbon engine is pure (no side effects) so it can be imported in both client and server contexts.
 - `components` -- UI composition. Contains React components built with shadcn/ui and Tailwind classes. Components must be strictly presentational; they should not access the database directly or perform side effects.
 - `prisma` -- Database schema and generated client. Define all models (User, Activity, AiMessage, etc.) here. Migrations live under `prisma/migrations`.
@@ -65,11 +65,20 @@ Emission factors are managed in the database (with defaults seeded from UK Gover
 
 ## AI Workflow
 
-AI interactions are orchestrated by Trigger.dev workflows defined under `trigger/`. These jobs handle constructing the AI prompt, executing the request to the LLM provider and returning the response back to the application. Because AI requests can take several seconds, they must never run inside API route handlers. Instead, the handler enqueues the job and returns immediately, while the client polls or listens for the response.
+AI interactions are orchestrated by Trigger.dev workflows defined under `jobs/`. These jobs handle constructing the AI prompt, executing the request to the LLM provider and returning the response back to the application. Because AI requests can take several seconds, they must never run inside API route handlers. Instead, the handler enqueues the job and returns immediately, while the client polls or listens for the response.
 
-## Scheduled Tasks
+## Scheduled Tasks and Background Jobs
 
-Certain recurring actions, such as resetting the monthly budget consumption at the start of each month, are implemented as scheduled Trigger.dev workflows. These jobs iterate through users, reset counters and persist the results. Scheduled tasks must be idempotent and atomic; they must not run concurrently for the same user.
+We define several recurring/scheduled tasks using Trigger.dev to automate background operations:
+
+| Job ID | Job Name | Cron Schedule | Description |
+| --- | --- | --- | --- |
+| `weekly-summary` | Send Weekly Summary Email | `0 9 * * MON` | Aggregates weekly CO₂e emissions for all users and dispatches summary notifications every Monday at 9:00 AM. |
+| `budget-reminders` | Monthly Budget Threshold Alerts | `0 10 * * *` | Runs daily at 10:00 AM. Checks monthly budget consumptions and alerts users who have exceeded 80% of their target budget. |
+| `challenge-reminders` | Active Challenge Nudge Notifications | `0 12 * * *` | Runs daily at 12:00 PM. Evaluates user challenge progresses and nudges users who have active, incomplete challenges. |
+| `data-cleanup` | Clean Up Historical Activity Logs | `0 2 * * *` | Runs daily at 2:00 AM. Purges historical activity logs older than two years to keep the database optimized. |
+
+Scheduled tasks must be idempotent and atomic; they must handle exceptions gracefully to avoid failing the entire batch, and ensure reliable execution.
 
 ## API Contracts
 

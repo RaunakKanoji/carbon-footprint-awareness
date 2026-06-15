@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature or implementation st
 
 ## Current Goal
 
-- Implement Error Handling and Notifications (Task 25).
+- Tasks 01-27 completed. Preparing MVP pull request from `development` into `main`.
 
 ## Completed
 
@@ -47,14 +47,39 @@ Update this file whenever the current phase, active feature or implementation st
 - Added or improved safe empty/loading/error states.
 - Cleaned unused code and removed non-production artifacts.
 - Verified forms avoid unsafe React Hook Form watch usage where applicable.
+- Implemented Error Handling and Notifications (tasks/25-error-handling-and-notifications.md):
+  - Created environment-specific logging service (`lib/logger.ts`).
+  - Implemented Next.js App Router Global Error Boundary (`app/error.tsx`) to catch client-side exceptions cleanly.
+  - Developed a custom, dependency-free Toast Notification system (`components/ui/toast-provider.tsx`) integrated globally (`app/layout.tsx`).
+  - Configured accessibility tags (`aria-invalid`, `aria-describedby`) and validation text mappings on reusable form inputs (`ValidationError.tsx`, `NumberInput.tsx`, `SelectInput.tsx`, `TextareaInput.tsx`).
+  - Standardized JSON error response formats in endpoints `/api/activity`, `/api/budget`, `/api/challenge`, and `/api/copilot`.
+  - Connected `useToast` to forms and actions in `LogClient.tsx`, `onboarding/page.tsx`, `SettingsClient.tsx`, `ChallengesClient.tsx`, and `CopilotClient.tsx`.
+  - Built an offline connectivity banner (`components/app/offline-warning.tsx`) inside the application layout shell (`components/app/app-shell.tsx`) to disable and warn users about offline form submissions.
+- Optimized Performance and Caching (tasks/26-performance-and-caching.md):
+  - Initialized React Query (`@tanstack/react-query`) client provider globally to manage and cache API responses on the client.
+  - Optimized database query patterns by creating `getDashboardData` which batches multiple queries into a single database transaction using Prisma `$transaction` and projects only the necessary columns/fields using Prisma `select`.
+  - Added server prefetching and hydration (Next.js HydrationBoundary + dehydrate) for dashboard metrics to ensure immediate, zero-network-call initial renders with automatic background revalidation.
+  - Extended the `/api/budget` GET API and created a new `/api/dashboard` GET API route to serve data directly to React Query.
+  - Implemented optimistic UI updates inside the budget target mutation (`onMutate`), instantly rendering target updates and sorting the history list client-side, with full rollback protection on mutation failure.
+  - Added lazy loading (`next/dynamic` with `ssr: false`) for heavy client components (`DashboardClient`, `InsightsClient`, `SimulatorClient`) to prevent hydration mismatches and dramatically reduce the initial JavaScript bundle size.
+  - Memoized derived calculations, equivalents metrics, and chart structures using `useMemo` in `InsightsClient` and `SimulatorClient`.
+- Configured Background Jobs with Trigger.dev (tasks/27-background-jobs-and-triggers.md):
+  - Configured `@trigger.dev/sdk` package dependency and client settings in `jobs/client.ts`.
+  - Implemented the `weeklySummaryJob` (`weekly-summary`) to query weekly CO₂e emissions from Prisma and send mock email summaries on a weekly cron schedule (`0 9 * * MON`).
+  - Implemented the `budgetRemindersJob` (`budget-reminders`) to run daily (`0 10 * * *`), check monthly budget consumptions, and send reminders if consumption exceeds 80% of target budget.
+  - Implemented the `challengeRemindersJob` (`challenge-reminders`) to run daily (`0 12 * * *`), calculate challenge progress, and nudge users with active, incomplete challenges.
+  - Implemented the `dataCleanupJob` (`data-cleanup`) to run daily (`0 2 * * *`) and purge activity logs older than two years.
+  - Created `jobs/index.ts` to register and export all defined background jobs and client for the Trigger.dev runtime.
+  - Configured `"trigger:dev"` and `"trigger:start"` running scripts inside `package.json`.
+  - Documented background job schedules, parameters, and behaviors in `progress-tracker.md` and `architecture-context.md`.
 
 ## In Progress
 
-- Task 25: Error Handling and Notifications.
+- MVP repository push and pull request merge.
 
 ## Next Up
 
-- Performance and Caching (tasks/26-performance-and-caching.md).
+- None
 
 ## Open Questions
 
@@ -116,3 +141,18 @@ Update this file whenever the current phase, active feature or implementation st
 - Fixed Issue 06: Bottom shadow of the main AI Copilot panels cut off. Wrapped the grid in a `flex-1 overflow-hidden` container and set the grid style to `h-full overflow-visible p-1 pb-2` to allow card shadows to render fully without clipping at the bottom or introducing full-page scrolling.
 - Reverted page typography to use Next.js `next/font/google` package (Inter and Fira Code) to optimize layout rendering and guarantee standard sans-serif system fonts render correctly when external assets cannot fetch.
 - Removed font-mono styling from numbers, quantities, and labels in dashboard and settings budget tables, ensuring uniform sans-serif (Inter) typography styling across the entire dashboard layout.
+- Fixed issues 20-23 from `context/current-issues.md`:
+  - Added explicit Achievements level display derived from real challenge points plus onboarding base XP.
+  - Verified Budget Limit History target values use app font with `tabular-nums` and no `font-mono`.
+  - Constrained the badge unlock popup to viewport height, avoided desktop popup scrolling, and removed the grey footer treatment.
+  - Prevented Log Activity focus ring clipping by padding the internal form scroll region and standardizing green focus-visible rings on shared fields and date inputs.
+- Verification for fixes 20-23: `npx tsc --noEmit`, `npm run lint`, `npm run build` with network access for Next.js Google font fetching, and `npm test` all pass.
+- Fixed Fix 30 from `context/current-issues.md`:
+  - Normalized chart gaps in dashboard, insights, and simulator Recharts components with consistent `barCategoryGap`, `barGap`, bar sizing, chart margins, and pie slice `paddingAngle`.
+  - Confirmed the current `context/current-issues.md` file does not contain Fixes or Issues 31-35, so no 31-35 implementation items were available in the issue source.
+- Reworked the current issue batch exactly across Fixes 15-30 from `context/current-issues.md`:
+  - Normalized Log Activity typography, focus-visible rings, form scroll padding, readable right-panel copy, and the bottom-anchored Coach Quick Tip.
+  - Added Copilot conversation deletion with ownership-checked DELETE API support, green Copilot icon treatment, active-conversation cleanup, and toast feedback.
+  - Aligned Waste and Shopping subtype values with seeded emission factors and challenge calculations.
+  - Added the Achievements level display, refined the badge unlock modal, removed inconsistent mono table typography, and normalized Dashboard/Simulator bottom spacing.
+  - Fixed chart y-axis clipping and inconsistent chart gaps across Dashboard, Insights, and Simulator.

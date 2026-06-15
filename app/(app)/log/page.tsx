@@ -25,7 +25,7 @@ export default async function LogActivityPage() {
   const todayStr = `${year}-${month}-${day}`;
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-4 w-full flex flex-col h-full overflow-visible min-h-0">
       <PageHeader
         title="Log Activity"
         description="Record your daily travels, food choices, household electricity consumption, purchases, and waste."
