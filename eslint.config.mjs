@@ -51,6 +51,10 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     'node_modules/**',
     'app/generated/**',
+    'src/generated/**',
+    'browser-extension/**',
+    '.claude/**',
+    '**/.claude/**',
   ]),
 ]);
 

@@ -1,9 +1,9 @@
 import { cronTrigger } from '@trigger.dev/sdk';
 
-import { ChallengeStatus } from '@/app/generated/prisma';
-import { getChallengeProgress } from '@/lib/challenges';
-import { sendChallengeReminderEmail } from '@/lib/emails';
-import { prisma } from '@/lib/prisma';
+import { ChallengeStatus } from '@/src/generated/prisma';
+import { getChallengeProgress } from '@/src/server/challenges/challenges.service';
+import { sendChallengeReminderEmail } from '@/src/server/notifications/emails.service';
+import { prisma } from '@/src/db/prisma';
 
 import { client } from './client';
 

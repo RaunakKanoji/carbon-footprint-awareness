@@ -1,16 +1,22 @@
-import React from 'react';
 import { redirect } from 'next/navigation';
-import { getCurrentUser } from '@/src/lib/auth';
-import OnboardingClient from './OnboardingClient';
 
-export default async function OnboardingPage() {
+import OnboardingClient from '@/src/features/onboarding/components/OnboardingClient';
+import { getCurrentUser } from '@/src/lib/auth';
+
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ preview?: string | string[] }>;
+}) {
+  const { preview } = await searchParams;
+  const isPreview = process.env.NODE_ENV === 'development' && preview === '1';
   const dbUser = await getCurrentUser();
 
   if (!dbUser) {
-    redirect('/sign-in');
+    redirect('/');
   }
 
-  if (dbUser.profile?.onboardingComplete) {
+  if (dbUser.profile?.onboardingComplete && !isPreview) {
     redirect('/dashboard');
   }
 

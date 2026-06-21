@@ -1,75 +1,78 @@
-import { redirect } from 'next/navigation';
 import React from 'react';
-
-import FeatureCard from '@/components/landing/feature-card';
-import LandingHero from '@/components/landing/landing-hero';
 import { getCurrentUser } from '@/src/lib/auth';
+
+// Import landing page sections
+import LandingNav from '@/components/landing/LandingNav';
+import HeroSection from '@/components/landing/HeroSection';
+import AppShowcase from '@/components/landing/AppShowcase';
+import FeatureGrid from '@/components/landing/FeatureGrid';
+import HowItWorks from '@/components/landing/HowItWorks';
+import ActivityCategories from '@/components/landing/ActivityCategories';
+import AiSimulatorSection from '@/components/landing/AiSimulatorSection';
+import ChallengesSection from '@/components/landing/ChallengesSection';
+import ExtensionSection from '@/components/landing/ExtensionSection';
+import ImpactStats from '@/components/landing/ImpactStats';
+import DataSourcesSection from '@/components/landing/DataSourcesSection';
+import TestimonialSection from '@/components/landing/TestimonialSection';
+import FinalCta from '@/components/landing/FinalCta';
+import LandingFooter from '@/components/landing/LandingFooter';
+
+export const metadata = {
+  title: 'Carbon Compass — Track and Reduce Your Carbon Footprint',
+  description:
+    'Carbon Compass helps you track everyday activities, understand your carbon footprint, simulate lifestyle changes, and build lower-impact habits with AI guidance.',
+};
 
 export default async function RootLandingPage() {
   const dbUser = await getCurrentUser();
-
-  if (dbUser) {
-    if (dbUser.profile?.onboardingComplete) {
-      redirect('/dashboard');
-    } else {
-      redirect('/onboarding');
-    }
-  }
-
-  const features = [
-    {
-      title: 'Daily Carbon Tracking',
-      description:
-        'Log daily transit, food consumption, and electricity usage with instantaneous calculation of greenhouse gas impact.',
-      iconName: 'PlusCircle',
-    },
-    {
-      title: 'AI Carbon Copilot',
-      description:
-        'Interact with an intelligent sustainability chatbot that analyzes your logs and delivers custom offset recommendations.',
-      iconName: 'Bot',
-    },
-    {
-      title: 'Lifestyle Simulator',
-      description:
-        'Model future options (e.g. buying an EV or changing your diet) to quantify offsets before you make the switch.',
-      iconName: 'Sliders',
-    },
-    {
-      title: 'Carbon Budget',
-      description:
-        'Define monthly greenhouse gas limits, track progress visually, and unlock gamified reduction goals.',
-      iconName: 'Trophy',
-    },
-  ];
+  const hasUser = !!dbUser;
 
   return (
-    <div className="flex-1 bg-bg-base flex flex-col items-center">
-      {/* Hero Section */}
-      <LandingHero />
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans antialiased text-textPrimary">
+      {/* 1. Navigation Bar */}
+      <LandingNav hasUser={hasUser} />
 
-      {/* Features Showcase Grid */}
-      <section id="features" className="w-full max-w-5xl px-6 pb-6 space-y-12">
-        <div className="text-center space-y-3">
-          <h2 className="text-3xl font-bold tracking-tight text-text-primary">
-            Smarter Carbon Reduction
-          </h2>
-          <p className="text-text-secondary text-sm w-full max-w-md mx-auto">
-            Everything you need to track, simulate, and reduce your greenhouse gas footprint.
-          </p>
-        </div>
+      {/* Main content wrapper */}
+      <main className="flex-1 w-full flex flex-col items-center overflow-x-hidden">
+        {/* 2. Hero Section */}
+        <HeroSection hasUser={hasUser} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {features.map((feature) => (
-            <FeatureCard
-              key={feature.title}
-              title={feature.title}
-              description={feature.description}
-              iconName={feature.iconName}
-            />
-          ))}
-        </div>
-      </section>
+        {/* 3. App UI Showcase (Desktop, Mobile, Extension mockups) */}
+        <AppShowcase />
+
+        {/* 4. Feature Highlights */}
+        <FeatureGrid />
+
+        {/* 5. How It Works */}
+        <HowItWorks />
+
+        {/* 6. Activity Tracking Categories */}
+        <ActivityCategories />
+
+        {/* 7. AI + Simulator Section */}
+        <AiSimulatorSection />
+
+        {/* 8. Challenges + Social Progress */}
+        <ChallengesSection />
+
+        {/* 9. Shopping Extension Section */}
+        <ExtensionSection />
+
+        {/* 10. Impact Metrics */}
+        <ImpactStats />
+
+        {/* 11. Data Sources / API Integrations */}
+        <DataSourcesSection />
+
+        {/* 12. Testimonial / Demo Story */}
+        <TestimonialSection />
+
+        {/* 13. Final CTA */}
+        <FinalCta hasUser={hasUser} />
+      </main>
+
+      {/* 14. Footer */}
+      <LandingFooter />
     </div>
   );
 }

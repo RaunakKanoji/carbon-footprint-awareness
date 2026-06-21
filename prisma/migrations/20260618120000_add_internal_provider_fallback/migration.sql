@@ -1,0 +1,4 @@
+ALTER TYPE "CalculationProvider" ADD VALUE IF NOT EXISTS 'INTERNAL';
+
+ALTER TABLE "ActivityLog"
+ADD COLUMN "fallbackUsed" BOOLEAN NOT NULL DEFAULT false;

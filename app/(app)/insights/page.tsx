@@ -1,12 +1,13 @@
-import React from 'react';
-
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/src/db/prisma';
+import InsightsClient from '@/src/features/insights/components/InsightsClient';
 import { getCurrentUser } from '@/src/lib/auth';
 
-import InsightsClient from './InsightsClient';
+function getDateDaysAgo(days: number) {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+}
 
 export default async function InsightsPage() {
   await connection();
@@ -14,26 +15,25 @@ export default async function InsightsPage() {
   const dbUser = await getCurrentUser();
 
   if (!dbUser) {
-    redirect('/sign-in');
+    redirect('/');
   }
 
   if (!dbUser.profile?.onboardingComplete) {
     redirect('/onboarding');
   }
 
-  const userId = dbUser.id;
-  const now = new Date();
+  const oneYearAgo = getDateDaysAgo(365);
 
-  // Fetch logs for the last 365 days
-  const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
   const logs = await prisma.activityLog.findMany({
     where: {
-      userId,
+      userId: dbUser.id,
       occurredAt: {
         gte: oneYearAgo,
       },
     },
-    orderBy: { occurredAt: 'desc' },
+    orderBy: {
+      occurredAt: 'desc',
+    },
     select: {
       id: true,
       category: true,
@@ -45,7 +45,6 @@ export default async function InsightsPage() {
     },
   });
 
-  // Serialize dates to ISO strings for client component safety
   const serializedLogs = logs.map((log) => ({
     id: log.id,
     category: log.category,

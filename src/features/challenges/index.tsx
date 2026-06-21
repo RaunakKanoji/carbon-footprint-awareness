@@ -1,0 +1,1 @@
+export { default as ChallengesClient } from './components/ChallengesClient';

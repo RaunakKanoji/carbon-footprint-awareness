@@ -1,214 +1,361 @@
-# Carbon Compass AI
+# Carbon Compass 🌿
 
-Carbon Compass AI is an AI-powered carbon awareness and habit-building platform that helps users understand, track, and reduce their personal carbon footprint through daily activity logging, personalized insights, carbon budgeting, simulation, challenges, and AI coaching.
+**AI-powered carbon tracking for everyday decisions.**
 
-## Overview
+Carbon Compass helps users understand, track, simulate, and reduce their personal carbon footprint through simple activity logging, personalized insights, AI coaching, lifestyle simulations, challenges, and social progress.
 
-Carbon Compass AI is built for the Carbon Footprint Awareness Platform challenge. The app turns everyday lifestyle choices into understandable CO2e estimates, then helps users make practical reduction decisions without needing to understand emissions science upfront.
+> **The game is not collecting points. The game is improving behavior.**
 
-The MVP combines activity logging, a personalized dashboard, AI coaching, insights, challenges, and a lifestyle simulator in one protected Next.js application. Users can establish a baseline profile, log daily transport, food, energy, shopping, and waste activity, then see how those actions affect their monthly footprint and budget.
+![Next.js](https://img.shields.io/badge/Next.js_16-000?logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?logo=tailwindcss&logoColor=white)
+![Clerk](https://img.shields.io/badge/Clerk-6C47FF?logo=clerk&logoColor=white)
 
-The product is designed to make sustainability feel specific and actionable. Instead of only showing abstract climate data, Carbon Compass AI connects emissions to habits, trends, tradeoffs, and small behavior changes users can realistically try.
+[Screenshots](#screenshots) · [Setup](#local-development) · [Architecture](#architecture) · [Data Sources](#carbon-estimation-strategy) · [Demo Guide](#demo-walkthrough-for-judges)
 
-## Problem
+---
 
-People often want to reduce their climate impact but do not know which daily choices matter most. Carbon footprint data can feel abstract, generic, or too complicated to apply to ordinary decisions.
+## Product Preview
 
-Carbon Compass AI addresses these pain points:
+![Carbon Compass Landing Page](docs/screenshots/landing-page.png)
 
-- Daily emissions are hard to estimate without tools.
-- Carbon impact is usually presented as abstract numbers, not behavior feedback.
-- Users need simple, actionable guidance tied to their own habits.
-- Sustainability apps often feel either too complex or too generic.
-- Habit change is easier when progress, goals, and reminders are visible.
+---
 
-## Solution
+## Why Carbon Compass?
 
-Carbon Compass AI helps users move from awareness to action through:
+Most people want to make better climate decisions, but carbon footprint tools are often too abstract, too manual, or too guilt-driven. Carbon Compass turns everyday actions into understandable insights and practical next steps.
 
-- Daily carbon activity logging across major lifestyle categories.
-- A personalized footprint dashboard with weekly and monthly context.
-- AI Copilot guidance based on profile, budget, and logged activity.
-- A lifestyle simulator for testing reduction scenarios before committing.
-- Insights and trends that identify top carbon drivers.
-- Challenges and achievements that make progress visible.
-- Budget tracking that turns carbon reduction into a monthly goal.
-- Profile-based baseline estimates for more relevant recommendations.
+Instead of asking users to become climate experts, Carbon Compass helps them answer:
 
-## Key Features
+- **What did I emit today?** — Live carbon estimates per activity logged
+- **Which habits matter most?** — Category breakdown by food, transport, energy, shopping, waste
+- **What can I change this week?** — Weekly missions, goals, and simulations
+- **How much would a lifestyle change actually save?** — The Lifestyle Simulator calculates it before you commit
+- **How can I stay consistent with friends?** — Leaderboards, streaks, XP, and milestones
+- **Is this cart worth buying?** — The browser extension shows cart footprint before checkout
 
-### Dashboard
+---
 
-The dashboard summarizes the user's carbon footprint at a glance. It includes today's footprint, weekly footprint, monthly target, remaining budget, category breakdowns, recent activities, and AI suggestions.
+## Core Features
 
-### Log Activity
+### 📊 Dashboard
+See your daily, weekly, and monthly footprint at a glance. Includes carbon budget status, category breakdown, weekly trend charts, recent activity logs, streak tracking, and a live AI coach tip.
 
-Users can log transport, food and meals, home energy, shopping, and waste activity. The form provides a live CO2e estimate before submission and records each activity with the selected category, subtype, quantity, unit, date, notes, and calculated emissions.
+### 📝 Activity Logging
+Log food, transport, energy, shopping, and waste activities using structured category forms. Supports barcode scanning, product search, AI-assisted input, and one-tap reuse of recent activities.
 
-### AI Copilot
+### ⚡ Carbon Estimates
+Each logged activity produces a CO₂e estimate with a **confidence label** (`HIGH / MEDIUM / LOW`) and a **source label** (e.g., `Agribalyse`, `OpenRouteService`, `CarbonSutra`, `Carbon Compass Engine`) so users always know the basis of the estimate.
 
-The AI Copilot acts as a carbon reduction coach. It can answer questions, review the user's carbon context, and provide practical recommendations for transport, food, energy, shopping, and budget goals. When an external AI key is not configured, the MVP still provides deterministic fallback guidance.
+### 🔮 Lifestyle Simulator
+Test lifestyle changes across transport, food, energy, shopping, and waste before committing them as goals. See simulated savings vs. your baseline in real time.
 
-### Lifestyle Simulator
+### 🏆 Challenges & Goals
+Join weekly missions with XP rewards. Set personal goals. Earn experience points, unlock milestones, maintain streaks, and compete through global and friends leaderboards.
 
-The simulator lets users model lifestyle changes before making them. It includes tabs for transport, diet, energy, and consumption changes, then estimates the potential monthly reduction impact and supports committing selected changes.
+### 🤖 AI Carbon Coach
+Ask questions about your own data and get personalized, practical suggestions powered by Gemini. The coach has access to your activity logs, goals, and lifestyle profile.
 
-### Insights
+### 🛍️ Product & Shopping Impact
+Estimate product carbon footprints through product name search, barcode scanning, ecommerce links, and receipt parsing. The **Chrome browser extension** surfaces cart footprint estimates before checkout and suggests lower-impact alternatives.
 
-Insights show a broader analytics view of the user's footprint. The page includes emission trend history, category share, top carbon drivers, commute patterns, and an activity heatmap.
+### 👤 Profile & Friends
+Manage your account, privacy settings, friend connections, progress summary, XP, streaks, goals, and milestones from a unified Profile page.
 
-### Challenges and Achievements
-
-Challenges provide lightweight gamification for habit building. Users can view active and completed challenges, track progress, and use points, levels, streaks, and badges as motivation signals.
-
-### Profile and Settings
-
-The profile stores baseline inputs such as location, household size, diet type, commute mode, commute distance, and electricity usage. Settings provide account and preference surfaces for the MVP app shell.
-
-### Error Handling and Notifications
-
-The app includes standardized API responses, toast notifications, an offline warning flow, and client error handling surfaces so common failures can be communicated without breaking the full app experience.
+---
 
 ## Screenshots
 
+### 🖥️ Public Landing Page
+
+![Carbon Compass Landing Page](docs/screenshots/landing-page.png)
+
+---
+
+### 📱 Product Application (Authenticated App)
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" width="49%" alt="Dashboard" />
+  <img src="docs/screenshots/activity.png" width="49%" alt="Activity Logging" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/simulation.png" width="49%" alt="Lifestyle Simulator" />
+  <img src="docs/screenshots/challenges.png" width="49%" alt="Weekly Missions & Challenges" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/profile.png" width="49%" alt="User Profile" />
+  <img src="docs/screenshots/coach.png" width="49%" alt="AI Carbon Coach" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/insights.png" width="49%" alt="Footprint Insights" />
+  <img src="docs/screenshots/products.png" width="49%" alt="Product Footprints" />
+</p>
+
+---
+
+## Product Walkthrough
+
+### 1. Onboarding
+
+New users answer a short lifestyle questionnaire covering diet type, commute mode and distance, monthly energy usage, shopping habits, and recycling behavior. Carbon Compass uses this to generate a **baseline carbon profile** — a starting estimate of annual kg CO₂e — which anchors all future comparisons.
+
+### 2. Log daily activities
+
+Users open the Activity page and select a category:
+
+| Category | What you log |
+|---|---|
+| 🥗 Food | Meals by name, barcode scan, or ingredient search |
+| 🚗 Transport | Mode, distance/route, or vehicle model |
+| ⚡ Energy | Electricity consumption (kWh), appliance use, gas, fuel |
+| 🛍️ Shopping | Product name, URL, barcode, or receipt |
+| 🗑️ Waste | Waste type, weight, or recycling session |
+
+Each log creates a **carbon estimate** with source and confidence labels immediately.
+
+### 3. Understand the dashboard
+
+The dashboard shows:
+- **Daily average** and **weekly total** CO₂e
+- **Weekly trend** — a stacked bar chart by category
+- **Category share** — a pie chart breakdown
+- **Budget remaining** — based on personal monthly carbon budget
+- **Streak** — consecutive days with at least one log
+- **Recent activity logs** with source/confidence labels
+- **AI coach tip** — one personalized suggestion based on recent data
+
+### 4. Simulate lifestyle changes
+
+The Lifestyle Simulator lets users drag sliders or set parameters to test changes like:
+- Switching from a petrol car to an EV or public transit
+- Reducing beef meals per week
+- Installing solar panels or reducing monthly kWh
+- Buying fewer new products
+
+The simulator shows **current baseline vs. simulated total** in real time, including monthly savings and percentage reduction.
+
+### 5. Turn insights into action
+
+Users can:
+- Commit a simulation result directly as a personal **Goal**
+- Join a **Weekly Mission** aligned with the simulated change
+- Track progress through the **Challenges** page (missions, goals, milestones, leaderboards)
+- Earn **XP** and unlock **milestones** for consistent logging and reductions
+
+### 6. Shop with awareness
+
+The **Carbon Compass Chrome Extension** runs on supported ecommerce sites (Amazon, Flipkart, Myntra, BigBasket, Blinkit, and more). It:
+- Detects cart/checkout pages automatically
+- Estimates the total carbon footprint of cart items
+- Surfaces a breakdown by product
+- Suggests alternatives: second-hand, delayed purchase, slower delivery, or fewer items
+- Optionally saves the shopping activity directly to Carbon Compass
+
+---
+
+## Feature Deep Dive
+
 ### Dashboard
 
-![Dashboard](public/screenshots/01-dashboard.png)
+| Element | Detail |
+|---|---|
+| Carbon snapshot | Daily and weekly totals in kg CO₂e |
+| Weekly trend | 7-day stacked bar chart by category |
+| Category breakdown | Pie chart with percentage share |
+| Recent logs | Last 5 activities with source labels |
+| Budget status | Progress bar vs. monthly target |
+| Streak counter | Days logged consecutively |
+| AI coach tip | One personalized recommendation |
 
-### Log Activity
+### Activity Logging Categories
 
-![Log Activity](public/screenshots/02-log-activity.png)
+Each category has tailored form fields:
 
-### AI Copilot
+**Food** — Meal name search, barcode scan via camera or manual code, ingredient-based lookup. Sources: Agribalyse dataset, Open Food Facts API, Carbon Compass Engine.
 
-![AI Copilot](public/screenshots/03-ai-copilot.png)
+**Transport** — Select mode (car, bus, metro, train, flight, motorbike, EV, cycling, walking), enter route or distance. Uses OpenRouteService for route distance calculation, CarbonSutra for vehicle emission factors.
+
+**Energy** — Log electricity consumption (kWh), fuel use (litres), appliance use by wattage × hours. Sources: CarbonSutra, Climatiq, Carbon Compass Engine with regional grid factor.
+
+**Shopping** — Product name search, barcode, URL paste, or receipt upload. Sources: Product impact database, Climatiq, Carbon Compass Engine product mappings.
+
+**Waste** — Type of waste (landfill, recycling, compost, e-waste), weight estimation. Source: Carbon Compass Engine with waste-stream factors.
 
 ### Lifestyle Simulator
 
-![Lifestyle Simulator](public/screenshots/04-simulator.png)
+The simulator works against a user's **baseline footprint** (calculated from onboarding answers). It supports:
 
-### Insights
+- Adjustable sliders for transport, food, energy, shopping, and waste parameters
+- Real-time calculation of **simulated total** vs. baseline
+- Breakdown of savings per category
+- Monthly CO₂e equivalent (e.g., "equivalent to planting 3 trees")
+- One-click commit to Goal or Challenge
 
-![Insights](public/screenshots/05-insights.png)
+### Challenges & Gamification
 
-### Challenges
-
-![Challenges](public/screenshots/06-challenges.png)
+| Feature | Description |
+|---|---|
+| Weekly missions | Time-bound challenges with clear success criteria and XP rewards |
+| Personal goals | User-defined targets committed from simulations or manually |
+| XP system | Earned by logging activities, completing missions, maintaining streaks |
+| Milestones | Long-term achievements (e.g., "First 100 kg saved") |
+| Leaderboards | Global, regional, and friends leaderboards by XP |
+| Streak | Daily logging streak with visual calendar |
 
 ### Profile
 
-![Profile](public/screenshots/07-profile.png)
+The Profile page contains three tabs:
 
-### Settings
+- **Account** — Name, email, avatar, Clerk auth management, privacy settings, leaderboard visibility toggle
+- **Friends** — Send/accept friend requests, view friends list, remove connections
+- **Summary** — Carbon profile overview, XP/level, milestones earned, active goals, logged activity statistics
 
-![Settings](public/screenshots/08-settings.png)
-
-### Onboarding
-
-![Onboarding](public/screenshots/09-onboarding.png)
-
-### Mobile Preview
-
-![Mobile Dashboard](public/screenshots/mobile/01-dashboard-mobile.png)
-
-![Mobile Log Activity](public/screenshots/mobile/02-log-activity-mobile.png)
-
-![Mobile AI Copilot](public/screenshots/mobile/03-ai-copilot-mobile.png)
-
-![Mobile Insights](public/screenshots/mobile/04-insights-mobile.png)
-
-## Tech Stack
-
-- Next.js 16 App Router
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- shadcn/ui-style component primitives and custom UI components
-- Clerk authentication
-- Prisma ORM
-- PostgreSQL
-- Docker Compose for local database setup
-- Recharts for charts and visualizations
-- Zod for validation
-- React Hook Form for form state
-- Lucide React and Font Awesome icons
-- Gemini API and OpenAI API support for AI Copilot responses
-- Trigger.dev SDK for background-job capability
-- Vitest for tests
+---
 
 ## Architecture
 
-```txt
-User
-  |
-  v
-Next.js App Router UI
-  |
-  +--> Server Components and Server Actions
-  |
-  +--> API Routes
-         |
-         +--> Prisma ORM
-         |      |
-         |      v
-         |   PostgreSQL
-         |
-         +--> AI Copilot Provider
-                |
-                v
-          Personalized guidance
+Carbon Compass is a full-stack **Next.js 16** application with a modular feature-driven directory structure.
+
+```
+carbon-footprint-awareness/
+├── app/
+│   ├── (auth)/                  # Sign-in, sign-up (Clerk)
+│   ├── (app)/                   # Protected app routes
+│   │   ├── dashboard/
+│   │   ├── activity/
+│   │   ├── simulator/
+│   │   ├── challenges/
+│   │   ├── coach/
+│   │   ├── insights/
+│   │   ├── products/
+│   │   ├── profile/
+│   │   └── onboarding/
+│   └── api/                     # API routes
+├── components/
+│   ├── app/                     # Shared app UI
+│   └── landing/                 # Landing page sections
+├── src/
+│   ├── features/                # Feature modules
+│   │   ├── activity-logging/
+│   │   ├── dashboard/
+│   │   ├── simulator/
+│   │   ├── challenges/
+│   │   ├── coach/
+│   │   ├── insights/
+│   │   ├── products/
+│   │   └── profile/
+│   ├── server/                  # Server-side services
+│   │   ├── carbon/              # Carbon estimation engine
+│   │   ├── activity/
+│   │   ├── dashboard/
+│   │   └── challenges/
+│   ├── lib/                     # Shared utilities
+│   │   ├── gamification/        # XP, milestones, streaks
+│   │   └── api-clients/         # External API wrappers
+│   └── db/                      # Prisma client
+├── prisma/
+│   └── schema.prisma
+└── browser-extension/
+    ├── public/manifest.json     # Chrome MV3 manifest
+    └── src/                     # Extension source
+        ├── content/             # Content scripts
+        ├── background/          # Service worker
+        └── popup/               # Extension popup
 ```
 
-High-level app structure:
+### Frontend
 
-```txt
-app/
-  (auth)/          Clerk sign-in and sign-up routes
-  (app)/           Protected MVP application pages
-  api/             Activity, dashboard, budget, challenge, and copilot APIs
-components/        App shell, feature components, charts, and UI primitives
-lib/               Carbon calculations, dashboard aggregation, Prisma, utilities
-prisma/            Schema and seed data
-public/            Static assets and screenshots
-```
+- **Next.js 16** App Router with React 19
+- **TypeScript** throughout
+- **Tailwind CSS v4** with custom design tokens
+- **shadcn/ui-style** component library
+- **Framer Motion** for animations
+- **TanStack Query** for data fetching and caching
+- **Recharts** for data visualization
+- Fully responsive — desktop-first with mobile support
 
-## Data Model
+### Backend
 
-Important Prisma models in the MVP:
+- **Next.js API Routes** for server actions and REST endpoints
+- **Prisma ORM** with PostgreSQL
+- **Clerk** for authentication and user management
+- Carbon estimation services with layered provider fallback
+- Gamification engine (XP, missions, milestones, streaks)
 
-- `User` - application user linked to Clerk.
-- `Profile` - onboarding and baseline lifestyle data.
-- `EmissionFactor` - category, subtype, unit, and factor metadata.
-- `ActivityLog` - user activity entries and calculated CO2e.
-- `Budget` - monthly carbon target per user.
-- `Conversation` - AI Copilot thread metadata.
-- `ConversationMessage` - user, assistant, and system messages.
-- `Challenge` - habit-building challenge status and progress metadata.
+### Browser Extension
 
-## Carbon Calculation Method
+- **Chrome Manifest V3**
+- Content scripts for cart/product detection on ecommerce sites
+- Service worker background script
+- Popup UI with cart footprint summary
+- Supports: Amazon, Flipkart, Myntra, BigBasket, Blinkit, Zepto, Swiggy, JioMart, Nykaa, Croma, Shopify stores
 
-Carbon Compass AI uses emission factors to estimate activity impact:
+---
 
-```txt
-CO2e = quantity x emission factor
-```
+## Carbon Estimation Strategy
 
-Examples:
+Carbon Compass uses a **layered estimation approach**:
 
-- Transport: distance x kg CO2e per km
-- Food: meals x kg CO2e per meal
-- Electricity: usage x kg CO2e per kWh
-- Waste: weight x kg CO2e per kg
-- Shopping: quantity x kg CO2e per item
+1. Prefer verified dataset-backed estimates where available (Agribalyse for food, OpenRouteService + emission factors for transport)
+2. Use category-specific external APIs for common activities (CarbonSutra, Climatiq)
+3. Fall back to the internal **Carbon Compass Engine** when exact data is unavailable
+4. Always show **confidence levels** (`HIGH / MEDIUM / LOW`) and **source labels** so users understand estimate quality
 
-The MVP factors are generalized estimates intended for awareness and comparison. Future versions can improve accuracy with verified product carbon footprint data, regional factors, receipt parsing, and product-level integrations.
+> The goal is not false precision. The goal is useful, transparent guidance that helps users compare choices and build better habits.
 
-## Getting Started
+### Data Sources
+
+| Area | Sources |
+|---|---|
+| Food | [Agribalyse v3.2](https://agribalyse.ademe.fr/), [Open Food Facts](https://world.openfoodfacts.org/), Carbon Compass Engine |
+| Transport | [OpenRouteService](https://openrouteservice.org/) (route distance), [CarbonSutra](https://carbonsutra.com/) (vehicle emission factors) |
+| Energy | [CarbonSutra](https://carbonsutra.com/), [Climatiq](https://climatiq.io/), Carbon Compass Engine (regional grid factors) |
+| Shopping | Product carbon database, [Climatiq](https://climatiq.io/), Carbon Compass Engine product category mappings |
+| Waste | Carbon Compass Engine with waste-stream emission factors |
+| Flights | [CarbonSutra](https://carbonsutra.com/) flight estimate API |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS v4 |
+| Animation | Framer Motion |
+| UI Components | shadcn/ui-style (Radix UI primitives) |
+| Charts | Recharts |
+| Auth | Clerk |
+| Database | PostgreSQL |
+| ORM | Prisma 7 |
+| Data Fetching | TanStack Query v5 |
+| AI | Google Gemini (Gemini Flash) |
+| External APIs | CarbonSutra, Climatiq, OpenRouteService, Open Food Facts, Agribalyse |
+| Browser Extension | Chrome Manifest V3 |
+| Testing | Vitest + Testing Library |
+| Package Manager | npm |
+
+---
+
+## Local Development
+
+### Prerequisites
+
+- Node.js 20+
+- npm 10+
+- PostgreSQL (local or remote)
+- API keys for external services (optional — the app uses fallback estimations without them)
 
 ### 1. Clone the repository
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/RaunakKanoji/carbon-footprint-awareness.git
 cd carbon-footprint-awareness
 ```
 
@@ -220,118 +367,213 @@ npm install
 
 ### 3. Configure environment variables
 
-Create `.env` or `.env.local` in the project root.
+```bash
+cp .env.example .env.local
+```
+
+Then fill in the required values in `.env.local`:
 
 ```env
-DATABASE_URL="postgresql://carbon:carbon@localhost:55432/carbon_compass"
+# Required
+DATABASE_URL=postgresql://username:password@localhost:5432/carbon_compass
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
+CLERK_SECRET_KEY=sk_...
 
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
+# AI Coach (required for coach feature)
+GEMINI_API_KEY=your_gemini_api_key
 
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
-
-GEMINI_API_KEY=
-OPENAI_API_KEY=
-TRIGGER_API_KEY=
+# Carbon APIs (optional — app uses internal engine as fallback)
+CARBONSUTRA_API_KEY=your_rapidapi_key
+CLIMATIQ_API_KEY=your_climatiq_key
+OPENROUTESERVICE_API_KEY=your_ors_key
 ```
 
-Only one AI provider key is required for live AI responses. If no AI key is configured, the Copilot route can still return fallback MVP guidance.
+All available environment variables are documented in [`.env.example`](.env.example).
 
-### 4. Start the local database
-
-```bash
-docker compose up -d
-```
-
-The included Docker Compose file starts PostgreSQL on local port `55432`.
-
-### 5. Set up Prisma
+### 4. Set up the database
 
 ```bash
+# Generate Prisma client
 npx prisma generate
-npx prisma db push
-npx prisma db seed
+
+# Run migrations
+npx prisma migrate dev
+
+# (Optional) Seed with sample emission factors
+npm run prisma:seed
+
+# (Optional) Seed mock user data & activity logs for a fully populated dashboard view
+npx tsx scripts/seed-mock-dashboard.ts
 ```
 
-If you prefer migration flow during development, use:
-
-```bash
-npm run prisma:migrate
-```
-
-### 6. Start the development server
+### 5. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open:
+Open: [http://localhost:3001](http://localhost:3001)
 
-```txt
-http://localhost:3001
+> The app runs on port **3001** by default (configured in `package.json`).
+
+---
+
+## Chrome Extension Setup
+
+The Carbon Compass browser extension helps users see estimated product/cart impact while shopping online.
+
+> **Status: Prototype** — The extension is functional for local development and selected ecommerce sites. Production Chrome Web Store submission is planned.
+
+### Supported sites
+
+Amazon · Flipkart · Myntra · BigBasket · Blinkit · Zepto · Swiggy · JioMart · Nykaa · Croma · Shopify stores
+
+### 1. Make sure the web app is running locally
+
+```bash
+npm run dev
 ```
 
-The project script runs Next.js on port `3001`.
+### 2. Build the extension
+
+```bash
+cd browser-extension
+npm install
+npm run build
+```
+
+### 3. Load in Chrome
+
+1. Open `chrome://extensions`
+2. Enable **Developer Mode** (top-right toggle)
+3. Click **Load unpacked**
+4. Select the `browser-extension/dist` folder
+5. Pin **Carbon Compass** in the toolbar
+
+### 4. Test locally
+
+Visit the built-in test page:
+
+```
+http://localhost:3001/dev/ecommerce-test
+```
+
+The extension should detect the simulated cart and show an estimated footprint overlay.
+
+---
 
 ## Available Scripts
 
-- `npm run dev` - start the Next.js development server on port 3001.
-- `npm run build` - create a production build.
-- `npm run start` - start the production server after building.
-- `npm run lint` - run ESLint across JavaScript and TypeScript files.
-- `npm run lint:fix` - run ESLint with automatic fixes.
-- `npm run test` - run Vitest.
-- `npm run format` - format files with Prettier.
-- `npm run prisma:migrate` - run Prisma development migrations.
-- `npm run prisma:generate` - generate Prisma client.
-- `npm run prisma:seed` - seed the database.
-- `npm run trigger:dev` - run Trigger.dev development tooling.
-- `npm run trigger:start` - start Trigger.dev worker tooling.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server on port 3001 |
+| `npm run build` | Create production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint checks |
+| `npm run typecheck` | Run TypeScript type checks |
+| `npm run test` | Run Vitest test suite |
+| `npm run prisma:migrate` | Run Prisma migrations |
+| `npm run prisma:generate` | Regenerate Prisma client |
+| `npm run prisma:seed` | Seed database with emission factors |
+| `npx prisma studio` | Open Prisma Studio (DB browser) |
+| `npm run format` | Format code with Prettier |
+| `npm run check:apis` | Check external API connectivity |
 
-## MVP Status
+---
 
-- [x] Authentication
-- [x] Onboarding/profile setup
-- [x] Dashboard
-- [x] Activity logging
-- [x] Carbon calculation engine
-- [x] Carbon budget tracking
-- [x] AI Copilot
-- [x] Lifestyle simulator
-- [x] Insights dashboard
-- [x] Challenges and achievement-style progress
-- [x] Toast notifications
-- [x] Offline warning surface
-- [x] Error handling and API response patterns
-- [x] Desktop screenshots
-- [x] Representative mobile screenshots
+## Demo Walkthrough for Judges
 
-Standalone `/budget` and `/achievements` pages are not separate MVP routes yet. Budget status is currently surfaced in the dashboard, and achievement-style progress is surfaced through challenges and profile statistics.
+**Recommended 3–5 minute flow:**
 
-## Known Limitations
+1. **Landing page** — Explain the product promise and the five tracked categories
+2. **Sign in** and land on the **Dashboard** — Point out the weekly snapshot, category breakdown, streak, and AI tip
+3. **Log a food activity** — Search for a meal by name, show the instant CO₂e estimate with Agribalyse source label and confidence rating
+4. **Log a transport activity** — Enter a route, show how OpenRouteService calculates distance and the petrol/EV comparison
+5. **Open the Simulator** — Adjust sliders for commute mode and beef meals, show real-time savings calculation
+6. **Commit the simulation as a Goal** — Navigate to Challenges, show active mission, XP, and leaderboard position
+7. **Open Profile → Summary** — Show XP, level, milestones, logged activity stats
+8. **Load the dev checkout test page** — Show the Chrome extension detecting the cart and surfacing a footprint estimate
+9. **Open the AI Coach** — Type a question like *"What is my biggest footprint source this week?"* and show a personalized response
 
-- Emission factors are generalized MVP estimates.
-- AI recommendations depend on available profile and activity log context.
-- Product-level carbon footprint verification is not implemented yet.
-- The app is optimized for the MVP web experience; deeper mobile polish can continue.
-- Carbon offsets, receipt scanning, and verified product databases are planned future improvements rather than current MVP features.
-- Some advanced background workflows are scaffolded but not required for the core MVP demo.
+---
 
-## Future Improvements
+## What Makes Carbon Compass Different?
 
-- Verified product carbon footprint database integration.
-- Browser extension for eco-unfriendly purchase or travel decisions.
-- Receipt, barcode, or product scanner.
-- Community challenges and team competitions.
-- Better ML personalization from user behavior over time.
-- Carbon offsets or sustainability marketplace integrations.
-- Richer analytics and exportable reports.
-- PWA/mobile app support.
-- Region-specific electricity grid and transport factors.
+Most climate apps either give you a one-time quiz result or track only one category. Carbon Compass is different because:
+
+- **Tracks real daily behavior** — not a one-time quiz, but a live log updated every day
+- **Full category coverage** — food, transport, energy, shopping, and waste in one place
+- **Confidence-labeled estimates** — users always know how accurate an estimate is and where it came from
+- **Lifestyle simulation before commitment** — test changes before making them real goals
+- **Behavioral loop** — logging → insights → simulation → goals → missions → streaks → milestones
+- **Social accountability** — friends, leaderboards, and shared missions keep users consistent
+- **Point-of-purchase awareness** — the browser extension brings footprint data to the moment of buying
+- **Guilt-free framing** — practical alternatives, not shame. The coach offers options, not lectures
+- **AI grounded in your data** — the coach answers based on your actual logs, not generic advice
+
+---
+
+## Architecture Decision Notes
+
+**Why Next.js App Router?** Server components reduce client bundle size for data-heavy pages like Dashboard and Insights. Server actions simplify mutation patterns for activity logging without a separate REST API.
+
+**Why Prisma + PostgreSQL?** The data model is highly relational — users → activities → estimates → challenges → XP → milestones. A relational DB with type-safe ORM keeps this coherent at scale.
+
+**Why layered carbon estimation?** No single API covers all five categories with high accuracy. A layered approach (verified dataset → external API → internal engine) maximizes coverage while allowing transparent confidence reporting.
+
+**Why a Chrome Extension as a separate build?** Chrome Manifest V3 extensions require isolated content scripts and a service worker. The extension calls the Carbon Compass API over localhost during development and over the deployed API in production.
+
+**Why Clerk for auth?** Clerk provides ready-made OAuth, session management, and webhook support, letting the team focus on carbon estimation and gamification logic instead of auth infrastructure.
+
+---
+
+## Roadmap
+
+- [ ] Improve verified product carbon footprint matching (barcode → exact product → lifecycle data)
+- [ ] Add more regional emission factors (EU, UK, US grid mixes)
+- [ ] Expand Chrome extension support and publish to Chrome Web Store
+- [ ] Add household/team accounts for shared carbon budgets
+- [ ] Add weekly review email reports with personalized tips
+- [ ] Add mobile app (React Native or progressive web app)
+- [ ] Deeper AI coach memory across sessions
+- [ ] Carbon budget recommendations calibrated by country/region
+- [ ] Exportable personal climate impact report (PDF)
+- [ ] Receipt OCR for automatic shopping activity parsing
+
+---
+
+## Current Limitations
+
+Carbon footprint estimation is genuinely complex. It depends on location, supplier chain, product lifecycle, transport emissions, packaging, and end-of-life treatment. Carbon Compass uses the best available APIs, public datasets, and internal fallback models — but some estimates are **approximate** by necessity.
+
+This is why every estimate shows:
+- A **source label** (where the data comes from)
+- A **confidence level** (`HIGH`, `MEDIUM`, or `LOW`)
+
+The goal is not false precision. The goal is directionally correct, actionable guidance that helps users build better habits over time.
+
+**Current known limitations:**
+- Shopping estimates rely on product-category mappings rather than product-specific lifecycle data for most items
+- The AI coach does not yet have persistent memory across sessions
+- The Chrome extension is prototype-level and not yet published to the Chrome Web Store
+- Some regional emission factors default to India-grid values and may not apply globally
+
+---
+
+## Built By
+
+Carbon Compass was built as a hackathon project for the Carbon Footprint Awareness Platform challenge.
+
+**Created by:** Raunak Kanoji
+
+---
 
 ## License
 
-License not specified yet.
+License not yet specified.
+
+---
+
+<p align="center">
+  <strong>Carbon Compass</strong> — Help people make lower-impact choices without guilt, complexity, or climate anxiety.
+</p>

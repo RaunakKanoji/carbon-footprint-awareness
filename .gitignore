@@ -102,5 +102,13 @@ notes/
 next-env.d.ts
 
 # App specific generated assets
-/app/generated/prisma
+/src/generated/prisma
 /.clerk/
+
+# Local Agribalyse dataset files
+data/agribalyse/*.csv
+data/agribalyse/*.xlsx
+data/agribalyse/*.ods
+
+# AI tool local skills and configuration (not part of the app)
+.claude/

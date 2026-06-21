@@ -2,7 +2,7 @@ import { auth, clerkClient } from '@clerk/nextjs/server';
 
 import { NextRequest } from 'next/server';
 
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/src/db/prisma';
 
 /**
  * Lightweight auth check — only verifies the JWT via auth().
@@ -26,7 +26,7 @@ export async function getCurrentUser() {
   // Fetch user and profile from Prisma
   let dbUser = await prisma.user.findUnique({
     where: { clerkId },
-    include: { profile: true },
+    include: { profile: true, carbonProfile: true, preferences: true },
   });
 
   // If the user doesn't exist in our DB yet, check email fallback or create them lazily
@@ -43,7 +43,7 @@ export async function getCurrentUser() {
     // Check if the user exists by email (e.g. if the clerkId changed)
     const existingUser = await prisma.user.findUnique({
       where: { email },
-      include: { profile: true },
+      include: { profile: true, carbonProfile: true, preferences: true },
     });
 
     if (existingUser) {
@@ -54,7 +54,7 @@ export async function getCurrentUser() {
           clerkId,
           name: name || existingUser.name,
         },
-        include: { profile: true },
+        include: { profile: true, carbonProfile: true, preferences: true },
       });
     } else {
       // Create new user and profile
@@ -66,9 +66,14 @@ export async function getCurrentUser() {
           profile: {
             create: {},
           },
+          preferences: {
+            create: {},
+          },
         },
         include: {
           profile: true,
+          carbonProfile: true,
+          preferences: true,
         },
       });
     }
@@ -82,6 +87,16 @@ export async function getCurrentUser() {
       },
     });
     dbUser.profile = profile;
+  }
+
+  // Ensure a UserPreference record exists for the user
+  if (dbUser && !dbUser.preferences) {
+    const preferences = await prisma.userPreference.create({
+      data: {
+        userId: dbUser.id,
+      },
+    });
+    dbUser.preferences = preferences;
   }
 
   return dbUser;

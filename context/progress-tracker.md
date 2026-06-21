@@ -4,14 +4,87 @@ Update this file whenever the current phase, active feature or implementation st
 
 ## Current Phase
 
-- Implementation
+- Done / Release Ready
 
 ## Current Goal
 
-- Tasks 01-27 completed. Preparing MVP pull request from `development` into `main`.
+- Product complete and fully verified, ready for final deployment.
+
 
 ## Completed
 
+- Implemented Testing & Maintain Code Quality (tasks/29-testing-and-quality.md):
+  - Configured Vitest testing environment with `vitest.config.ts`, `vite-tsconfig-paths`, and `@vitest/coverage-v8`.
+  - Implemented unit tests for the core `carbon-engine.service.ts` logic (baseline calculations, db loading, factor lookup, calculation error handling) in `src/server/carbon/carbon-engine.test.ts`.
+  - Implemented validation schema tests for `onboardingSchema` in `src/validations/onboarding.test.ts`.
+  - Implemented API route tests for the activity creation endpoint in `src/server/activity/activity-api.test.ts`.
+  - Implemented component tests for `ValidationError.tsx` component rendering and custom class names in `src/components/forms/ValidationError.test.tsx` using `@testing-library/react`.
+  - Verified that all 38 tests pass successfully with code coverage report generated.
+- Completed Final UI Polish & QA (tasks/30-ui-polish-and-finalization.md):
+  - Updated all Waste category colors and chip classes to Red (`#ef4444`) across dashboard, profile breakdown, profile recent activities list, insights, recent activities logs, and design tokens.
+  - Removed page header component containing Insights title and description from the insights route.
+  - Checked for console logs and leftover `TODO` comments.
+- Prepared and verified Production Deployment (tasks/28-production-deployment.md):
+  - Documented hosting platform selection (Vercel) and environment variable configuration mapping.
+  - Specified production database migration (`npx prisma migrate deploy`) and seeding (`npx prisma db seed`) workflows.
+  - Verified local production build compilation (`npm run build`) runs successfully with Next.js and TypeScript configurations.
+  - Outlined GitHub CI/CD integration, monitoring/logging tools (Vercel Analytics), and SSL/custom domain setups.
+- Refined Travel logging around four real use cases:
+  - Commute and Errand include personal vehicles, motorcycle, public transit, walking, and cycling, but exclude flights.
+  - Trips support domestic and international scope; domestic adds domestic flights, while international is limited to international flight, train, and bus.
+  - Delivery excludes personal cars and offers motorcycle, delivery van, delivery truck, rail, bicycle, and walking.
+  - Added calibrated fallback factors for motorcycle, flights, delivery vans, and delivery trucks.
+  - Flight route calculation now uses great-circle distance instead of a road route.
+- Removed the Dashboard Badges card and connected Current Missions to real active challenges:
+  - Mission count and names now come from persisted `Challenge` rows with `ACTIVE` status.
+  - Shows an empty-state prompt when no mission is active instead of inventing a minimum mission count.
+- Reworked the Dashboard streak into a real consistency tracker:
+  - Calculates consecutive logging days instead of counting every active day in the selected chart period.
+  - Added a prominent flame state, current streak count, today status, and a seven-day activity sequence.
+  - Keeps the streak stable when switching Dashboard chart periods.
+- Fixed Carbon Coach conversation history loading:
+  - Restored the GET handler that was accidentally removed from `/api/copilot` during the thin-route refactor and exposed it through canonical `/api/coach`.
+  - Updated the Coach client to use the canonical endpoint, preserve the active conversation when a request fails, and display the server-provided error instead of mismatched stale messages.
+- Redesigned the Carbon Coach interface to match the current Carbon Compass UI:
+  - Added the same strong page hierarchy, rounded card system, emerald visual language, and responsive spacing used by Dashboard and Activity Logs.
+  - Rebuilt conversation history, empty state, prompt cards, message bubbles, loading/error states, and composer without changing the existing streaming or conversation APIs.
+  - Added a multiline composer with Enter-to-send and Shift+Enter support.
+- Improved the Travel activity form:
+  - Reworked the flow into clear purpose, route, transport mode, trip details, and review sections.
+  - Replaced the transport dropdown with visual mode cards for car, bus, metro, train, bicycle, and walking.
+  - Added source/destination swapping, current-location feedback, and a compact optional Google Maps importer.
+  - Added explicit one-way versus return-trip handling and a visible total distance summary.
+  - Removed the prefilled distance so users cannot accidentally log a fabricated trip, and disabled submission until a valid distance is provided.
+- Connected all four Food logging modes to persisted provider-backed services:
+  - Added `FoodCatalogItem` for popular foods with ingredient-level estimates and `UserFoodLog` for reproducible user history.
+  - Popular/Search foods now load from PostgreSQL and calculate ingredient emissions with Agribalyse plus calibrated Carbon Compass fallback factors.
+  - Barcode/Scan resolves product identity and ingredients through Open Food Facts before ingredient-level estimation.
+  - Recent loads the signed-in user’s prior food analyses and rescales them for quick repeat logging.
+  - AI Meals uses Gemini structured JSON output exclusively, then calculates each ingredient with Agribalyse/internal factors instead of trusting the model for carbon totals.
+  - Added `/api/food/catalog`, `/api/food/recent`, and `/api/food/analyze`; food logging persists both `ActivityLog` and `UserFoodLog`.
+  - Added migration `20260619120000_add_food_catalog_and_logs`. Local migration execution was blocked by existing migration-history drift; no destructive reset was performed.
+- Expanded activity logging category experiences to match the Food tab-card interaction:
+  - Added Transport purpose cards for Commute, Errand, Travel, Delivery, and Other.
+  - Added shared source/destination inputs, browser current-location support, Google Maps directions-link import, OpenRouteService geocoding/distance calculation, and automatic distance population for every transport purpose.
+  - Added Shopping cards for Clothing, Electronics, Online Order, and Household purchases.
+  - Added Energy cards for Grid Electricity and Solar Energy.
+  - Added Waste cards for Landfill, Recycling, Composting, Plastic, Paper, and Food Waste.
+  - Updated `/log/[category]` and `/log?category=...` handling so category deep links open the correct activity experience.
+  - Verification: `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` pass.
+- Completed the Carbon Compass source and route architecture migration (`context/structure/01-structure.md`):
+  - Removed the duplicate root `components/` and `lib/` trees after moving shared UI, forms, utilities, validation, database access, and business services under `src/`.
+  - Moved CarbonSutra, Climatiq, Carbon Interface, OpenRouteService, Open Food Facts, and Agribalyse code from `src/lib` to `src/integrations`.
+  - Moved generated Prisma output from `app/generated/prisma` to `src/generated/prisma` and updated the Prisma generator/imports.
+  - Added centralized `src/config/routes.ts`, grouped `src/config/navigation.ts`, `src/config/env.ts`, and `src/config/constants.ts`.
+  - Added canonical `/footprint` and `/goals` routes; reduced `/carbon`, `/carbon-profile`, `/carbon-budget`, `/commuting`, and `/copilot` to compatibility redirects.
+  - Updated desktop navigation to Main, Improve, Products, and Account groups; updated mobile navigation to Dashboard, Log, Coach, Insights, and Profile.
+  - Kept `/log/transport` as the real OpenRouteService route-planning and route-carbon logging flow.
+  - Moved activity, budget/goals, challenges, and coach API logic into `src/server`; added canonical `/api/goals`, `/api/challenges`, and `/api/coach` wrappers while retaining compatibility endpoints.
+  - Expanded coach context with profile, monthly and weekly activity totals, budget, active challenges, and recent product scans, with explicit instructions not to invent missing user data.
+  - Removed build-time Google Fonts network fetching while preserving the existing Inter/Fira Code CSS font stacks; standardized production builds on Next.js webpack because Turbopack cannot create its CSS worker inside the restricted execution environment.
+  - Verification: `npm run typecheck`, `npm run lint`, `npm test`, `npm run structure`, and `npm run build` pass.
+  - Executed `npm run check:apis`: local Agribalyse data passed; external providers and the local CarbonSutra playground request reported `fetch failed` because network/localhost access is restricted in the verification sandbox. The health-check command completed successfully and retained prototype fallbacks.
+  - Remaining intentional fallbacks: Carbon Interface remains dev/testing-only; receipt OCR still requires manual review; coach uses a local response fallback when no configured LLM succeeds.
 - Defined the project overview and objectives.
 - Established the architecture context and system boundaries.
 - Created the code standards document.
@@ -35,6 +108,13 @@ Update this file whenever the current phase, active feature or implementation st
 - Implement Activity Logging Forms (tasks/16-activity-logging-forms.md).
 - Create API Endpoints for Activity Logs and Budgets (tasks/17-api-endpoints-for-logs.md).
 - Build Dashboard Page (tasks/18-dashboard-page.md).
+- Refactored Dashboard & Visualisation (`context/features/dashboard.md`):
+  - Replaced the legacy provider, commute-route, old metric, and generic suggestion sections with one responsive dashboard implementation.
+  - Added accurate daily, seven-day, current-month, and remaining-budget summary cards.
+  - Added day/week/month selection backed by `GET /api/dashboard?period=...` and cached client fetching through React Query.
+  - Added palette-aligned category breakdown and daily trend charts with precise tooltips and today highlighting.
+  - Added linked top contributors and up to three data-driven recommendations with estimated CO₂e reductions.
+  - Added dashboard loading, empty, error, and retry states.
 - Implement Carbon Budget Feature (tasks/19-budget-feature.md).
 - Implement AI Copilot Integration (tasks/20-ai-copilot-integration.md).
 - Build Chat UI and Streaming (tasks/21-chat-ui-and-streaming.md).
@@ -72,14 +152,131 @@ Update this file whenever the current phase, active feature or implementation st
   - Created `jobs/index.ts` to register and export all defined background jobs and client for the Trigger.dev runtime.
   - Configured `"trigger:dev"` and `"trigger:start"` running scripts inside `package.json`.
   - Documented background job schedules, parameters, and behaviors in `progress-tracker.md` and `architecture-context.md`.
+- Implemented CarbonSutra provider integration (`context/api/01-carbon-sutra.md`):
+  - Added server-only CarbonSutra endpoint configuration, RapidAPI client, payload builders, defensive response normalization, and SHA-256 cache key helper under `src/lib/carbonsutra/`.
+  - Added `src/server/carbon/carbon.service.ts` with cached `estimateWithCarbonSutra()` plus endpoint-specific estimate helpers.
+  - Added `src/server/carbon/activity.service.ts` to save normalized CarbonSutra estimates into `ActivityLog`.
+  - Extended Prisma schema with CarbonSutra-supported activity categories, `CalculationProvider`, `CarbonEstimateConfidence`, provider/source metadata fields on `ActivityLog`, and `CarbonEstimateCache`.
+  - Created and applied Prisma migration `20260615211405_add_carbonsutra_provider`.
+  - Added authenticated user route `POST /api/carbon/estimate` for transport, electricity, and flight estimates that stores results in PostgreSQL.
+  - Added developer-only routes `GET /api/dev/carbonsutra/config` and `POST /api/dev/carbonsutra/test` guarded by `ENABLE_DEV_API_PLAYGROUND`.
+  - Added `/dev/carbon-playground` with configuration status, endpoint selector, editable JSON samples, cache toggle, normalized result display, raw response viewer, copy, and clear actions.
+  - Added user-facing `/carbon` route and `CarbonActivityForm` for commute, electricity, and flight estimates without exposing CarbonSutra field names.
+  - Added `.env.example` CarbonSutra configuration with documented endpoint paths and a `typecheck` script in `package.json`.
+  - Updated dashboard aggregation to include CarbonSutra categories while continuing to use stored `co2eKg` as the source of truth.
+  - Improved CarbonSutra dev playground diagnostics for upstream failures by returning status, configured path, and raw upstream response without exposing secrets.
+  - Corrected local CarbonSutra endpoint paths and aligned outgoing payloads with CarbonSutra's snake_case request validation while defensively normalizing pasted uppercase JSON.
+- Implemented Carbon Interface provider integration (`context/api/02-carbon-interface.md`):
+  - Added server-only Carbon Interface client, constants, payload builders, normalization, types, and SHA-256 cache helper under `src/lib/carbon-interface/`.
+  - Added `src/server/carbon/carbon-interface.service.ts` with cached estimates for vehicle, electricity, flight, shipping, and fuel combustion plus vehicle make/model metadata lookups.
+  - Updated `src/server/carbon/activity.service.ts` to persist either CarbonSutra or Carbon Interface normalized estimates into `ActivityLog`.
+  - Extended Prisma `CalculationProvider` with `CARBON_INTERFACE`, added an `ActivityLog.provider` index, and created migration `20260616121704_add_carbon_interface_provider`.
+  - Extended `POST /api/carbon/estimate` to support Carbon Interface vehicle, electricity, flight, shipping, and fuel request shapes while preserving existing CarbonSutra request compatibility.
+  - Added developer-only routes `GET /api/dev/carbon-interface/config`, `POST /api/dev/carbon-interface/test`, `GET /api/dev/carbon-interface/vehicle-makes`, and `GET /api/dev/carbon-interface/vehicle-models`, guarded by `ENABLE_DEV_API_PLAYGROUND` and authentication.
+  - Added `/dev/carbon-interface-playground` with configuration status, estimate type selector, JSON payload editor, cache toggle, normalized result display, raw response viewer, copy, clear, vehicle makes, and vehicle models tests.
+  - Updated user-facing `/carbon` copy and `CarbonActivityForm` to submit Carbon Interface vehicle, electricity, and flight estimates without exposing API secrets.
+  - Added Carbon Interface placeholders to `.env.example`.
+  - Added unit coverage for Carbon Interface normalization, payload builders, and cache key stability in `src/lib/carbon-interface/normalize.test.ts`.
+  - Verified `npx prisma format`, `npx prisma migrate dev --name add_carbon_interface_provider`, `npx prisma generate`, `npx prisma migrate status`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` all pass.
+- Implemented Climatiq provider integration (`context/api/03-carbon-climatiq.md`):
+  - Added server-only Climatiq client, constants, types, normalization, cache helper, search parameter builder, payload builders, and default placeholder mapping definitions under `src/lib/climatiq/`.
+  - Added `src/server/carbon/climatiq.service.ts` with search, estimate, batch estimate, saved mapping lookup/save, mapping-based transport/electricity/fuel/spend/product estimates, cache use, normalization, and placeholder ID rejection.
+  - Added `src/server/carbon/provider-router.service.ts` for provider-based routing scaffolding while preserving CarbonSutra and Carbon Interface implementations.
+  - Extended Prisma with `PRODUCT` and `MATERIAL` categories, Climatiq source metadata fields on `ActivityLog`, and `EmissionFactorMapping`; created migration `20260616174333_add_climatiq_provider_mappings`.
+  - Extended `POST /api/carbon/estimate` to support Climatiq `TRANSPORT`, `ELECTRICITY`, `FUEL`, `SHOPPING`, and `PRODUCT` request shapes and save normalized logs.
+  - Added developer-only Climatiq routes `config`, `search`, `estimate`, `batch-estimate`, and `mappings`, guarded by `ENABLE_DEV_API_PLAYGROUND` and authentication.
+  - Added `/dev/climatiq-playground` with config status, search, estimate, batch estimate, saved mappings, raw JSON viewers, copy actions, mapping save, edit, deactivate, and test mapping flows.
+  - Updated `/carbon` to use user-friendly Climatiq mapped activity forms for transport, electricity, fuel, shopping, and product/material.
+  - Updated dashboard data and UI with provider breakdown and provider labels in recent activities.
+  - Added Climatiq placeholders to `.env.example` and removed a real-looking Carbon Interface key from `.env.example`.
+  - Added unit coverage for Climatiq normalization, payload builders, search params, placeholder detection, and cache key stability in `src/lib/climatiq/normalize.test.ts`.
+  - Verified `npx prisma format`, `npx prisma migrate dev --name add_climatiq_provider_mappings`, `npx prisma generate`, `npx prisma migrate status`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` all pass.
+- Implemented OpenRouteService integration:
+  - Added server-side OpenRouteService configuration, client helpers, payload builders, response normalization, Google Maps link parsing, and SHA-256 cache key support under `src/lib/openrouteservice/`.
+  - Added route services for geocoding, reverse geocoding, distance calculation, matrix calls, multi-profile route comparisons, saved places, imported routes, and route-based carbon logging.
+  - Extended Prisma with `SavedPlace`, `ImportedRoute`, and `RouteEstimateCache`; created migration `20260616202434_add_route_models`.
+  - Added authenticated location APIs for geocode, reverse geocode, route distance, route matrix, route comparison, Google Maps link import, saved places, imported routes, and route carbon estimates.
+  - Added developer-only OpenRouteService config/test APIs and `/dev/openrouteservice-playground`, guarded by `ENABLE_DEV_API_PLAYGROUND` and optional admin email allowlist.
+  - Added `/commuting` with route planning, saved place management, Google Maps URL import, travel mode comparison, distance caching visibility, and route carbon activity logging.
+  - Added `OPENROUTESERVICE_API_KEY` and `OPENROUTESERVICE_BASE_URL` placeholders to `.env.example`.
+- Implemented Open Food Facts integration (`context/api/05-open-food-facts.md`):
+  - Added server-only Open Food Facts client, constants, types, normalization, cache helpers, barcode validation, category tag candidate helpers, and payload builders under `src/lib/open-food-facts/`.
+  - Added product lookup, deliberate search, product scan, product carbon estimate, and food factor mapping services under `src/server/products/`.
+  - Extended Prisma with `FoodProduct`, `ProductScan`, `FoodCarbonFactorMapping`, `ProductLookupCache`, and `AGRIBALYSE` provider support; added migration `20260617120000_add_open_food_facts_products`.
+  - Added backend product routes for barcode lookup, search, scan logging, carbon estimation, and recent scans.
+  - Added developer-only Open Food Facts config/product/search/category-mapping routes and `/dev/open-food-facts-playground`, guarded by `ENABLE_DEV_API_PLAYGROUND`.
+  - Added `/products` with camera barcode scanning via browser `BarcodeDetector` after explicit user action, manual barcode fallback, product metadata display, carbon estimate testing/logging, and scan history deletion.
+  - Added `OPEN_FOOD_FACTS_BASE_URL` and `OPEN_FOOD_FACTS_USER_AGENT` placeholders to `.env.example`.
+- Implemented Agribalyse local dataset provider integration (`context/api/06-agribalyse-table.md`):
+  - Added Agribalyse constants, types, CSV parser, flexible column mapper, normalizer exports, matching helpers, quantity validators, and CO₂e calculation helpers under `src/lib/agribalyse/`.
+  - Extended Prisma with `AgribalyseFoodFactor`, `FoodFactorMapping`, and `AgribalyseImportJob`; added migration `20260617150000_add_agribalyse_provider`.
+  - Added server services for Agribalyse import preview/confirm, factor search/stats, factor estimates, food mapping management, and ActivityLog creation under `src/server/food/`.
+  - Added public Agribalyse routes for search, estimate, mappings, import handoff, and stats under `/api/food/agribalyse`.
+  - Added developer-only Agribalyse config, import-preview, import-confirm, search, estimate, and mappings routes under `/api/dev/agribalyse`, guarded by `ENABLE_DEV_API_PLAYGROUND` and authentication.
+  - Added `/dev/agribalyse-playground` with config, CSV import preview/confirm, factor search, estimate, mapping management, Open Food Facts match testing, and stats tabs.
+  - Added `scripts/import-agribalyse.ts` fallback importer for local CSV datasets with `--version`, `--replace`, `--yes`, and `--dry-run` flags.
+  - Added `data/agribalyse/README.md`, `.gitkeep`, and `.gitignore` rules for local `.csv`, `.xlsx`, and `.ods` datasets.
+  - Updated Open Food Facts product carbon flow to try local Agribalyse category/factor mappings before older provider fallbacks.
+  - Added `AGRIBALYSE_DATA_VERSION` and `AGRIBALYSE_SOURCE_NAME` placeholders to `.env.example`.
+  - Added unit coverage for Agribalyse CSV parsing, column detection, localized decimal parsing, normalization, and quantity-based estimate math.
+- Implemented API playground console redesign (`context/api/07-api-playround.md`):
+  - Added shared developer-console components for playground shell, purpose cards, configuration status, app flow, endpoint explanations, request previews, normalized output, error panels, badges, local test history, and provider index cards.
+  - Enhanced the raw JSON viewer with response size, copy, clear, search, and expand/collapse controls.
+  - Updated CarbonSutra, Carbon Interface, Climatiq, OpenRouteService, Open Food Facts, and Agribalyse playgrounds to use a consistent API Testing & Understanding Console structure.
+  - Added provider-specific educational copy, configuration states, app integration flow cards, endpoint explanation panels, request previews, normalized output before raw response, error fix guidance, and local test history.
+  - Added central `/dev/api-playgrounds` index with provider cards and task-to-provider routing guide.
+  - Preserved existing API routes and playground test behavior without exposing secrets or silently creating ActivityLog entries.
+- Implemented final API polish and UI integration (`context/api/08-api-integration.md`):
+  - Added a centralized activity estimator with CarbonSutra → Climatiq → calibrated internal fallback behavior.
+  - Kept Carbon Interface outside all MVP-critical fallback chains.
+  - Updated standard activity logging routes/actions to persist provider, confidence, fallback, method, factor/reference, normalized input, and source metadata.
+  - Added authenticated, non-persisting live estimates to the Log Activity forms with source, confidence, and fallback labels.
+  - Added source information to success messages and compact fallback labels to dashboard recent activities.
+  - Extended general product estimation with closest-category fallback messaging while retaining Open Food Facts and Agribalyse barcode flows.
+  - Added stable internal factors for all specified/default transport, food, energy, shopping, and waste options.
+  - Documented provider responsibilities and calibration in `docs/api-integration.md` and `docs/carbon-engine-calibration.md`.
+- Implemented Carbon Compass structural completion (`context/api/09-carbon-structure.md`):
+  - Added persisted carbon profiles, setup-stage budget metadata, receipt uploads, owned products, and weekly reviews without duplicating existing activity, budget, challenge, conversation, or product-scan models.
+  - Split onboarding, generated carbon profile, and carbon budget into sequential routes with dashboard guards.
+  - Expanded onboarding persistence for meals, fuel, shopping, waste, travel, household, and reduction-goal inputs.
+  - Added required route structure for category logs, travel/voice handoffs, global receipt review, activity details, `/coach`, weekly review, and owned-product lifetime tracking.
+  - Added editable receipt/manual-review fallback that estimates and saves an activity even when OCR is unavailable.
+  - Added activity trust details and actions for source, confidence, fallback explanation, delete, log again, simulator, and coach.
+  - Connected simulator commitments to persisted missions/challenges.
+  - Updated desktop/mobile navigation to the required product structure without changing visual styling.
+  - Added Data Sources & Accuracy settings content.
+  - Added `docs/api-usage-audit.md` and `docs/performance-notes.md`.
+  - Updated API health checks so optional provider failures are reported without failing the prototype.
+  - Applied and recorded additive migration `20260618220000_add_product_structure_models`.
 
 ## In Progress
 
-- MVP repository push and pull request merge.
+- None
 
 ## Next Up
 
-- None
+- Existing local migration-history drift remains for earlier provider tables; additive migrations
+  `20260618120000_add_internal_provider_fallback` and
+  `20260618220000_add_product_structure_models` were applied directly and marked as applied without
+  resetting user/provider data.
+- Import an Agribalyse CSV with `npx tsx scripts/import-agribalyse.ts ./data/agribalyse/agribalyse.csv --version=3.2 --yes` after applying the migration.
+- Set `ENABLE_DEV_API_PLAYGROUND=true` locally when testing `/dev/agribalyse-playground`.
+- Create active `FoodFactorMapping` rows from Open Food Facts tags to imported `AgribalyseFoodFactor` rows before expecting barcode scans to use Agribalyse.
+- Configure `OPEN_FOOD_FACTS_USER_AGENT` in `.env.local` before live product lookup. Use a descriptive app/contact value such as `CarbonCompassAI/1.0 (contact: you@example.com)`.
+- Set `ENABLE_DEV_API_PLAYGROUND=true` locally when testing `/dev/open-food-facts-playground`.
+- Create active `FoodCarbonFactorMapping` rows before expecting product scans to produce carbon estimates.
+- Configure `CLIMATIQ_API_KEY`, `CLIMATIQ_BASE_URL`, and `CLIMATIQ_DATA_VERSION` in `.env.local` before testing live Climatiq calls.
+- Configure `OPENROUTESERVICE_API_KEY` and `OPENROUTESERVICE_BASE_URL` in `.env.local` before testing live route, geocoding, and matrix calls.
+- Set `ENABLE_DEV_API_PLAYGROUND=true` locally when testing `/dev/openrouteservice-playground`.
+- Use `/dev/climatiq-playground` search to find real Climatiq activity IDs and save active `EmissionFactorMapping` rows before using the normal `/carbon` Climatiq form.
+- Configure `CARBON_INTERFACE_API_KEY` in `.env.local` before testing live Carbon Interface calls.
+- Set `ENABLE_DEV_API_PLAYGROUND=true` locally when testing `/dev/carbon-interface-playground`.
+- Copy the documented CarbonSutra endpoint paths from `.env.example` into `.env.local` if local playground calls return 404.
+- Set `ENABLE_DEV_API_PLAYGROUND=true` locally when testing `/dev/carbon-playground`.
+- Repair/confirm the Carbon Interface account email before re-enabling it; it remains excluded from
+  MVP-critical flows.
+- Run the authenticated CarbonSutra playground test from a signed-in browser session; the standalone
+  health script receives `401 Unauthorized` from the protected endpoint.
 
 ## Open Questions
 
@@ -95,6 +292,20 @@ Update this file whenever the current phase, active feature or implementation st
 
 ## Session Notes
 
+- 2026-06-21: Implemented testing framework (Vitest, jsdom, coverages) and wrote unit tests for the Carbon Engine, onboarding schema, route APIs, and components, reaching 38 passing tests with coverage. Styled PieChart tooltips across the app (dashboard, profile, insights) to match the premium styled BarChart tooltip layout. Verified production build success.
+- 2026-06-21: Read task 28 "Prepare Production Deployment" and updated the progress-tracker.md with the corresponding configuration details. Verified production build success locally.
+- 2026-06-18: Re-read `context/features/dashboard.md`, `context/ui-context.md`, `context/project-overview.md`, and the bundled Next.js 16 Server/Client Components, data fetching, and Route Handlers guides. Replaced the active legacy dashboard with the specified responsive summary, selectable period charts, linked top contributors, recommendations, React Query API loading, and retry handling. Verification passed for `npm run typecheck`, the full lint suite, and all 11 Vitest tests. `npm run build` reached the production compilation step but could not fetch Inter and Fira Code from Google Fonts in the restricted network environment; the required network-enabled rerun was rejected because the approval service usage limit was reached.
+- 2026-06-17: Re-read populated `context/api/07-api-playround.md` and implemented the developer API playground redesign across all existing playgrounds plus `/dev/api-playgrounds`. Verification passed for `npm run typecheck`, `npm run lint`, `npx prisma format`, `npx prisma generate`, and `npm test`. `npm run build` failed only because sandboxed network access could not fetch Google Fonts for `next/font`; escalated rerun was rejected by the approval system due account usage limits, so production build completion could not be verified in this session.
+- 2026-06-17: Read `context/api/07-api-playround.md`; the file is zero bytes, and `context/api/` has no alternate populated `07-api-playground.md` file. No code changes were made because there were no implementation instructions to apply.
+- 2026-06-17: Implemented Agribalyse as a local database-backed food LCA provider with CSV import preview/confirm, script fallback import, factor search/stats, manual estimates, mapping management, Open Food Facts category-to-Agribalyse estimate integration, ActivityLog persistence, developer playground, env template entries, dataset ignore rules, Prisma schema updates, manual migration file, and focused unit tests. Verification passed for `npx prisma format`, `npx prisma generate`, `npx prisma validate`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` with network access for Next.js Google Fonts. `npx prisma migrate dev --name add_agribalyse_provider` failed with `Schema engine error`, matching the existing local Prisma migration blocker.
+- 2026-06-17: Implemented Open Food Facts backend-only product lookup/search, database caching, product scan history, food category mapping management, manual/Climatiq/Agribalyse-aware product carbon estimation, user `/products` scanner with manual fallback, developer playground, env template entries, Prisma schema updates, and manual migration file. Verification passed for `npx prisma format`, `npx prisma generate`, `npx prisma validate`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` with network access for Next.js Google Fonts. `prisma migrate dev --name add_open_food_facts_products` could not run locally because the Prisma schema engine returned `Schema engine error`, matching the prior OpenRouteService session blocker.
+- 2026-06-17: Completed OpenRouteService integration with authenticated route planning APIs, developer playground, `/commuting` route tracker, saved places, Google Maps import parsing, route comparison, route-based carbon logging, dashboard commute metrics, env template entries, and progress tracker updates. Verification passed for `npx prisma format`, `npx prisma generate`, `npx prisma validate`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` with network access for Next.js Google Fonts. `npx prisma migrate status` repeatedly failed with `Schema engine error` before reporting migration state, so local migration status could not be confirmed from that command.
+- 2026-06-16: Re-read populated `context/api/03-carbon-climatiq.md` and implemented Climatiq provider support, saved mappings, developer playground, user-facing mapped form support, dashboard provider breakdown, Prisma migration, env template entries, and tests. Live Climatiq endpoint calls were not verified because a Climatiq API key and real saved factor mappings were not available in the task output.
+- 2026-06-16: Read `context/api/03-carbon-climatiq.md`; the file is zero bytes, so no code changes were made for this spec. Re-read the local Next.js 16 Route Handlers docs before evaluating implementation work.
+- 2026-06-16: Re-read populated `context/api/02-carbon-interface.md` and implemented the Carbon Interface provider, user route support, developer playground, environment template entries, and Prisma migration. Live Carbon Interface endpoint calls were not verified because the local environment API key is not part of the implementation task output.
+- 2026-06-16: Continued Carbon Interface hardening by allowing omitted `provider` in normal Carbon Interface estimate requests as specified, adding focused helper tests, and re-verifying typecheck, lint, test, build, and migration status.
+- 2026-06-16: Investigated Carbon Interface playground failures showing missing environment variables. Added local non-secret `CARBON_INTERFACE_BASE_URL`, improved server errors to name missing variable keys without exposing values, disabled playground test submission when configuration is incomplete, and re-verified typecheck, lint, tests, and build.
+- 2026-06-16: Read `context/api/02-carbon-interface.md`; the file is zero bytes, so no code changes were made for this spec. Re-read the local Next.js 16 Route Handlers and Mutating Data docs before evaluating implementation work.
 - All context and feature files must be created and reviewed before coding begins.
 - Ensure environment variables for Clerk, PostgreSQL and Trigger.dev are documented in the README or environment template.
 - Re-read tasks/01-design-system.md and verified the design system primitives are present in the current repo: Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea, components.json, lucide-react and the cn() helper in lib/utils.ts.

@@ -16,6 +16,7 @@
 
   --color-border-default: var(--border-default);
   --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
@@ -30,6 +31,14 @@
   --color-state-error: var(--state-error);
   --color-state-success: var(--state-success);
   --color-state-warning: var(--state-warning);
+  --color-tone-blue: var(--tone-blue);
+  --color-tone-blue-soft: var(--tone-blue-soft);
+  --color-tone-purple: var(--tone-purple);
+  --color-tone-purple-soft: var(--tone-purple-soft);
+  --color-tone-amber: var(--tone-amber);
+  --color-tone-amber-soft: var(--tone-amber-soft);
+  --color-tone-red: var(--tone-red);
+  --color-tone-red-soft: var(--tone-red-soft);
 
   /* Shadcn mapped properties */
   --color-background: var(--background);
@@ -102,23 +111,32 @@
   --font-fira-code:
     'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
-  --bg-base: #f5f7fa;
+  --bg-base: #f8fafc;
   --bg-surface: #ffffff;
-  --bg-elevated: #f0f4f8;
-  --bg-subtle: #e5eaef;
-  --border-default: #d0d7de;
-  --border-subtle: #e5eaef;
+  --bg-elevated: #f1f5f9;
+  --bg-subtle: #f8fafc;
+  --border-default: #e5e7eb;
+  --border-subtle: #eef2f7;
+  --border-strong: #d1d5db;
   --text-primary: #111827;
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
   --text-faint: #9ca3af;
   --accent-primary: #10b981;
-  --accent-primary-dim: rgba(16, 185, 129, 0.12);
-  --accent-ai: #6366f1;
-  --accent-ai-text: #7c83f8;
-  --state-error: #dc2626;
-  --state-success: #059669;
-  --state-warning: #d97706;
+  --accent-primary-dim: rgba(16, 185, 129, 0.1);
+  --accent-ai: #8b5cf6;
+  --accent-ai-text: #7c3aed;
+  --state-error: #ef4444;
+  --state-success: #10b981;
+  --state-warning: #f59e0b;
+  --tone-blue: #3b82f6;
+  --tone-blue-soft: rgba(59, 130, 246, 0.1);
+  --tone-purple: #8b5cf6;
+  --tone-purple-soft: rgba(139, 92, 246, 0.1);
+  --tone-amber: #f59e0b;
+  --tone-amber-soft: rgba(245, 158, 11, 0.12);
+  --tone-red: #ef4444;
+  --tone-red-soft: rgba(239, 68, 68, 0.1);
 
   /* Spacing */
   --space-xs: 0.25rem;
@@ -157,13 +175,13 @@
   --ring: var(--accent-primary);
 
   /* Charts */
-  --chart-1: #059669;
-  --chart-2: #6366f1;
-  --chart-3: #10b981;
-  --chart-4: #fbbf24;
+  --chart-1: #10b981;
+  --chart-2: #3b82f6;
+  --chart-3: #f59e0b;
+  --chart-4: #8b5cf6;
   --chart-5: #6b7280;
 
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 }
 
 .dark {
@@ -202,8 +220,89 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans), sans-serif;
+    text-rendering: optimizeLegibility;
   }
   html {
     @apply font-sans;
   }
+}
+
+/* Scoped Clerk Overrides for clean full-page auth layout */
+.auth-clerk-container {
+  width: 100%;
+}
+
+.auth-clerk-container .cl-rootBox {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  overflow: visible !important;
+}
+
+.auth-clerk-container .cl-cardBox {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  background-color: transparent !important;
+  overflow: visible !important;
+}
+
+.auth-clerk-container .cl-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.auth-clerk-container .cl-main {
+  width: 100% !important;
+  max-width: 100% !important;
+  background-color: transparent !important;
+  overflow: visible !important;
+}
+
+.auth-clerk-container .cl-socialButtons {
+  overflow: visible !important;
+}
+
+.auth-clerk-container .cl-formFieldLabel {
+  display: none !important;
+}
+
+.auth-clerk-container .cl-footer {
+  display: none !important;
+}
+
+.auth-clerk-container .cl-formFieldInput {
+  min-height: 2.75rem !important;
+  border-radius: 0.75rem !important;
+}
+
+.auth-clerk-container .cl-formButtonPrimary {
+  min-height: 2.75rem !important;
+  border-radius: 0.75rem !important;
+}
+
+.auth-clerk-container .cl-socialButtons {
+  padding-top: 0.75rem !important;
+}
+
+.auth-clerk-container .cl-socialButtonsBlockButton {
+  min-height: 2.75rem !important;
+  border-radius: 0.75rem !important;
+  overflow: visible !important;
+  position: relative !important;
+}
+
+.auth-clerk-container .cl-socialButtonsBlockButtonBadge {
+  overflow: visible !important;
+  position: absolute !important;
+  top: -0.625rem !important;
+  right: -0.5rem !important;
+  z-index: 10 !important;
 }

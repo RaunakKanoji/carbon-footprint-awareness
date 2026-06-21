@@ -1,27 +1,28 @@
-import React from 'react';
-
 import { redirect } from 'next/navigation';
 
-import PageHeader from '@/components/app/page-header';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/src/db/prisma';
+import SimulatorClient from '@/src/features/simulator/components/SimulatorClient';
 import { getCurrentUser } from '@/src/lib/auth';
 
-import SimulatorClient from './SimulatorClient';
+function getDateDaysAgo(days: number) {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+}
 
 export default async function SimulatorPage() {
   const dbUser = await getCurrentUser();
 
   if (!dbUser) {
-    redirect('/sign-in');
+    redirect('/');
   }
 
   if (!dbUser.profile?.onboardingComplete) {
     redirect('/onboarding');
   }
 
-  // Fetch active emission factors from the database
   const factors = await prisma.emissionFactor.findMany({
-    where: { isActive: true },
+    where: {
+      isActive: true,
+    },
     select: {
       id: true,
       category: true,
@@ -32,18 +33,8 @@ export default async function SimulatorPage() {
     },
   });
 
-  const serializedFactors = factors.map((f) => ({
-    id: f.id,
-    category: f.category,
-    subType: f.subType,
-    unit: f.unit,
-    factor: f.factor,
-    region: f.region,
-  }));
+  const thirtyDaysAgo = getDateDaysAgo(30);
 
-  // Fetch the user's activity logs for the last 30 days
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const logs = await prisma.activityLog.findMany({
     where: {
       userId: dbUser.id,
@@ -66,37 +57,42 @@ export default async function SimulatorPage() {
     },
   });
 
-  const serializedLogs = logs.map((log) => ({
-    id: log.id,
-    category: log.category,
-    subType: log.subType,
-    quantity: log.quantity,
-    unit: log.unit,
-    co2eKg: log.co2eKg,
-    note: log.note,
-    occurredAt: log.occurredAt.toISOString(),
-  }));
-
   const profile = dbUser.profile
     ? {
-        city: dbUser.profile.city,
-        state: dbUser.profile.state,
-        country: dbUser.profile.country,
-        householdSize: dbUser.profile.householdSize,
-        dietType: dbUser.profile.dietType,
-        commuteMode: dbUser.profile.commuteMode,
-        commuteDistanceKm: dbUser.profile.commuteDistanceKm,
-        electricityUsageKwh: dbUser.profile.electricityUsageKwh,
-      }
+      city: dbUser.profile.city,
+      state: dbUser.profile.state,
+      country: dbUser.profile.country,
+      householdSize: dbUser.profile.householdSize,
+      dietType: dbUser.profile.dietType,
+      commuteMode: dbUser.profile.commuteMode,
+      commuteDistanceKm: dbUser.profile.commuteDistanceKm,
+      electricityUsageKwh: dbUser.profile.electricityUsageKwh,
+    }
     : null;
 
   return (
     <div className="flex min-h-0 w-full flex-col gap-6 pb-6">
-      <PageHeader
-        title="Lifestyle Change Simulator"
-        description="Model hypothetical choices in transport, diet, energy, shopping, and waste to see your potential CO₂e offset."
+      <SimulatorClient
+        initialLogs={logs.map((log) => ({
+          id: log.id,
+          category: log.category,
+          subType: log.subType,
+          quantity: log.quantity,
+          unit: log.unit,
+          co2eKg: log.co2eKg,
+          note: log.note,
+          occurredAt: log.occurredAt.toISOString(),
+        }))}
+        profile={profile}
+        factors={factors.map((factor) => ({
+          id: factor.id,
+          category: factor.category,
+          subType: factor.subType,
+          unit: factor.unit,
+          factor: factor.factor,
+          region: factor.region,
+        }))}
       />
-      <SimulatorClient initialLogs={serializedLogs} profile={profile} factors={serializedFactors} />
     </div>
   );
 }

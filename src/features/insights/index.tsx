@@ -1,0 +1,1 @@
+export { default as InsightsClient } from './components/InsightsClient';

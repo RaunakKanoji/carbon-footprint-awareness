@@ -1,7 +1,7 @@
 import { cronTrigger } from '@trigger.dev/sdk';
 
-import { sendBudgetReminderEmail } from '@/lib/emails';
-import { prisma } from '@/lib/prisma';
+import { sendBudgetReminderEmail } from '@/src/server/notifications/emails.service';
+import { prisma } from '@/src/db/prisma';
 
 import { client } from './client';
 
