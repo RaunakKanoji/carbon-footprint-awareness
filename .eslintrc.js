@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  ignorePatterns: ['app/generated/**'],
+  ignorePatterns: ['app/generated/**', '.claude/**', 'node_modules/**', '.next/**'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: ['./tsconfig.json'],

@@ -1,0 +1,1 @@
+export { default as CoachClient } from './components/CoachClient';

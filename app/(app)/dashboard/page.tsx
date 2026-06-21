@@ -1,36 +1,24 @@
-import React from 'react';
-
 import { redirect } from 'next/navigation';
 
-import DashboardClient from '@/components/dashboard/DashboardClient';
-import { getDashboardData } from '@/lib/dashboard';
+import DashboardClient from '@/src/features/dashboard/components/DashboardClient';
+import { getDashboardData } from '@/src/server/dashboard/dashboard.service';
+import { prisma } from '@/src/db/prisma';
 import { getCurrentUser } from '@/src/lib/auth';
 
 export default async function DashboardPage() {
   const dbUser = await getCurrentUser();
 
-  if (!dbUser) {
-    redirect('/sign-in');
-  }
+  if (!dbUser) redirect('/');
+  if (!dbUser.profile?.onboardingComplete) redirect('/onboarding');
+  if (!dbUser.carbonProfile) redirect('/footprint');
 
-  if (!dbUser.profile?.onboardingComplete) {
-    redirect('/onboarding');
-  }
+  const hasBudget = await prisma.budget.findFirst({
+    where: { userId: dbUser.id },
+    select: { id: true },
+  });
+  if (!hasBudget) redirect('/goals');
 
-  // Single batched $transaction — replaces 8 sequential Prisma queries
-  const data = await getDashboardData(dbUser.id);
+  const initialData = await getDashboardData(dbUser.id, 'week');
 
-  return (
-    <DashboardClient
-      todayFootprint={data.todayFootprint}
-      weeklyFootprint={data.weeklyFootprint}
-      monthlyBudget={data.monthlyBudget}
-      monthlyConsumption={data.monthlyConsumption}
-      remainingBudget={data.remainingBudget}
-      trendPercentage={data.trendPercentage}
-      weeklyLogs={data.weeklyLogs}
-      categoryShare={data.categoryShare}
-      recentActivities={data.recentActivities}
-    />
-  );
+  return <DashboardClient initialData={initialData} />;
 }

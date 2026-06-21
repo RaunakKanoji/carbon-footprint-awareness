@@ -1,7 +1,7 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/src/lib/utils';
 import { iconMap } from '@/src/lib/icons';
 
 interface IconProps extends Omit<FontAwesomeIconProps, 'icon'> {

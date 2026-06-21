@@ -1,6 +1,6 @@
 import { cronTrigger } from '@trigger.dev/sdk';
 
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/src/db/prisma';
 
 import { client } from './client';
 

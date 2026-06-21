@@ -5,7 +5,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,12 +14,36 @@ datasource db {
 
 enum ActivityCategory {
   TRANSPORT
+  ELECTRICITY
+  FLIGHT
+  FUEL
+  HOTEL
+  SHIPPING
   FOOD
   ENERGY
   SHOPPING
+  PRODUCT
+  MATERIAL
   WASTE
+  RECYCLING
   OFFSET
   OTHER
+}
+
+enum CalculationProvider {
+  CARBONSUTRA
+  CARBON_INTERFACE
+  MANUAL
+  INTERNAL
+  OPEN_FOOD_FACTS
+  CLIMATIQ
+  AGRIBALYSE
+}
+
+enum CarbonEstimateConfidence {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 enum DietType {
@@ -58,44 +82,70 @@ enum ChallengeStatus {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  clerkId       String   @unique
-  email         String   @unique
-  name          String?
+  id      String  @id @default(cuid())
+  clerkId String  @unique
+  email   String  @unique
+  name    String?
 
-  profile       Profile?
-  activities    ActivityLog[]
-  budgets       Budget[]
-  conversations Conversation[]
-  challenges    Challenge[]
+  profile        Profile?
+  preferences    UserPreference?
+  activities     ActivityLog[]
+  budgets        Budget[]
+  conversations  Conversation[]
+  challenges     Challenge[]
+  savedPlaces    SavedPlace[]
+  importedRoutes ImportedRoute[]
+  productScans   ProductScan[]
+  foodLogs       UserFoodLog[]
+  carbonProfile  CarbonProfile?
+  receipts       ReceiptUpload[]
+  ownedProducts  OwnedProduct[]
+  weeklyReviews  WeeklyReview[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  gamification            UserGamification?
+  sentFriendships         Friendship[]             @relation("FriendshipRequester")
+  receivedFriendships     Friendship[]             @relation("FriendshipReceiver")
+  missionParticipants     MissionParticipant[]
+  sentMissionInvites      MissionInvite[]          @relation("MissionInviteSender")
+  receivedMissionInvites  MissionInvite[]          @relation("MissionInviteReceiver")
+  goals                   Goal[]
+  milestones              UserMilestone[]
+  xpEvents                XpEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Profile {
-  id                    String       @id @default(cuid())
-  userId                String       @unique
-  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  city                  String?
-  state                 String?
-  country               String?
-  householdSize          Int?
+  city          String?
+  state         String?
+  country       String?
+  householdSize Int?
 
-  dietType              DietType?
-  commuteMode           CommuteMode?
-  commuteDistanceKm      Float?
-  electricityUsageKwh    Float?
+  dietType            DietType?
+  commuteMode         CommuteMode?
+  commuteDistanceKm   Float?
+  electricityUsageKwh Float?
+  mealFrequency       Int?
+  vehicleFuelType     String?
+  shoppingFrequency   String?
+  wasteHabits         String?
+  travelFrequency     String?
+  reductionGoal       String?
+  onboardingAnswers   Json?
 
-  onboardingComplete     Boolean      @default(false)
+  onboardingComplete Boolean @default(false)
 
-  createdAt              DateTime     @default(now())
-  updatedAt              DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model EmissionFactor {
-  id          String           @id @default(cuid())
+  id String @id @default(cuid())
 
   category    ActivityCategory
   subType     String
@@ -106,10 +156,10 @@ model EmissionFactor {
   region      String?
   isActive    Boolean          @default(true)
 
-  activities  ActivityLog[]
+  activities ActivityLog[]
 
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([category, subType, unit, region])
   @@index([category])
@@ -117,40 +167,131 @@ model EmissionFactor {
 }
 
 model ActivityLog {
-  id               String           @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId           String
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   emissionFactorId String?
-  emissionFactor   EmissionFactor?  @relation(fields: [emissionFactorId], references: [id], onDelete: SetNull)
+  emissionFactor   EmissionFactor? @relation(fields: [emissionFactorId], references: [id], onDelete: SetNull)
 
-  category         ActivityCategory
-  subType          String
-  quantity         Float
-  unit             String
+  category     ActivityCategory
+  subType      String
+  activityType String           @default("")
+  quantity     Float
+  unit         String
 
-  factorUsed       Float?
-  co2eKg           Float
+  quantityValue Float?
+  quantityUnit  String?
 
-  note             String?
-  occurredAt       DateTime         @default(now())
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  distanceValue Float?
+  distanceUnit  String?
+
+  energyValue Float?
+  energyUnit  String?
+
+  weightValue Float?
+  weightUnit  String?
+
+  moneyValue Float?
+  moneyUnit  String?
+
+  country String?
+  region  String?
+  city    String?
+
+  factorUsed Float?
+  co2eKg     Float
+  provider   CalculationProvider @default(MANUAL)
+
+  sourceEndpoint String?
+  sourcePayload  Json?
+  sourceResponse Json?
+
+  sourceFactorId   String?
+  sourceActivityId String?
+  sourceDataset    String?
+  sourceRegion     String?
+  sourceYear       Int?
+
+  confidence        CarbonEstimateConfidence @default(MEDIUM)
+  fallbackUsed      Boolean                  @default(false)
+  calculationMethod String?
+
+  note       String?
+  occurredAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([userId, occurredAt])
   @@index([userId, category])
   @@index([category, subType])
+  @@index([provider])
+  @@index([sourceFactorId])
+  @@index([sourceActivityId])
+  @@index([createdAt])
+}
+
+model CarbonEstimateCache {
+  id             String   @id @default(cuid())
+  provider       String
+  endpoint       String
+  cacheKey       String   @unique
+  co2eKg         Float
+  sourcePayload  Json
+  sourceResponse Json
+  createdAt      DateTime @default(now())
+
+  @@index([provider])
+  @@index([endpoint])
+  @@index([createdAt])
+}
+
+model EmissionFactorMapping {
+  id String @id @default(cuid())
+
+  provider        String @default("CLIMATIQ")
+  appCategory     String
+  appActivityType String
+
+  label       String
+  description String?
+
+  climatiqFactorId    String?
+  climatiqActivityId  String?
+  climatiqDataVersion String
+  climatiqRegion      String?
+  climatiqYear        Int?
+  climatiqSource      String?
+  climatiqDataset     String?
+  unitType            String?
+
+  defaultParameters Json?
+  metadata          Json?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider])
+  @@index([appCategory])
+  @@index([appActivityType])
+  @@index([isActive])
 }
 
 model Budget {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  month     DateTime
-  targetKg  Float
+  month               DateTime
+  targetKg            Float
+  weeklyTargetKg      Float?
+  reductionPercentage Float?
+  targetDate          DateTime?
+  budgetType          String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -159,57 +300,747 @@ model Budget {
   @@index([userId, month])
 }
 
+model CarbonProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  monthlyFootprintKg Float
+  yearlyFootprintKg  Float
+  mainImpactCategory String
+  categoryBreakdown  Json
+  confidence         CarbonEstimateConfidence @default(MEDIUM)
+  dataSources        Json
+  generatedAt        DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+}
+
+model ReceiptUpload {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  receiptType    String
+  filename       String?
+  status         String  @default("REVIEWED")
+  extractedText  String?
+  reviewedData   Json
+  activityLogIds Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model OwnedProduct {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name                   String
+  category               String
+  brand                  String?
+  estimatedFootprintKg   Float
+  purchaseDate           DateTime?
+  condition              String?
+  usageFrequency         String?
+  expectedLifetimeMonths Int?
+  notes                  String?
+  dataSource             String                   @default("Carbon Compass estimate")
+  confidence             CarbonEstimateConfidence @default(LOW)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model WeeklyReview {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  weekStart DateTime
+  weekEnd   DateTime
+  summary   Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, weekStart])
+  @@index([userId, weekStart])
+}
+
 model Conversation {
-  id        String                @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId    String
-  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  title     String?
-  summary   String?
-  metadata  Json?
+  title    String?
+  summary  String?
+  metadata Json?
 
-  messages  ConversationMessage[]
+  messages ConversationMessage[]
 
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, updatedAt])
 }
 
 model ConversationMessage {
-  id             String           @id @default(cuid())
+  id String @id @default(cuid())
 
   conversationId String
-  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  role           ConversationRole
-  content        String
-  metadata       Json?
+  role     ConversationRole
+  content  String
+  metadata Json?
 
-  createdAt      DateTime         @default(now())
+  createdAt DateTime @default(now())
 
   @@index([conversationId, createdAt])
 }
 
 model Challenge {
-  id          String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId      String
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  title       String
-  description String?
-  category    ActivityCategory?
+  title        String
+  description  String?
+  category     ActivityCategory?
   targetCo2eKg Float?
-  status      ChallengeStatus @default(ACTIVE)
+  status       ChallengeStatus   @default(ACTIVE)
 
-  startedAt   DateTime        @default(now())
+  startedAt   DateTime  @default(now())
   completedAt DateTime?
 
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, status])
   @@index([category])
+}
+
+model SavedPlace {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  label   String
+  name    String?
+  address String?
+
+  latitude  Float
+  longitude Float
+
+  source   String // MANUAL, OPENROUTESERVICE, GOOGLE_MAPS_LINK, GOOGLE_TAKEOUT, GOOGLE_TIMELINE
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([source])
+}
+
+model ImportedRoute {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  source           String // MANUAL, GOOGLE_MAPS_LINK, GOOGLE_TIMELINE, SAVED_PLACE
+  originLabel      String?
+  destinationLabel String?
+
+  originAddress      String?
+  destinationAddress String?
+
+  originLat      Float
+  originLng      Float
+  destinationLat Float
+  destinationLng Float
+
+  profile         String
+  distanceMeters  Float?
+  distanceKm      Float?
+  durationSeconds Float?
+  durationMinutes Float?
+
+  carbonLogged  Boolean @default(false)
+  activityLogId String?
+
+  rawImport     Json?
+  routePayload  Json?
+  routeResponse Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([source])
+  @@index([profile])
+  @@index([createdAt])
+}
+
+model RouteEstimateCache {
+  id       String @id @default(cuid())
+  provider String @default("OPENROUTESERVICE")
+  endpoint String
+  cacheKey String @unique
+
+  distanceMeters  Float?
+  distanceKm      Float?
+  durationSeconds Float?
+  durationMinutes Float?
+
+  sourcePayload  Json
+  sourceResponse Json
+
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([provider])
+  @@index([endpoint])
+  @@index([createdAt])
+  @@index([expiresAt])
+}
+
+model FoodProduct {
+  id String @id @default(cuid())
+
+  barcode     String  @unique
+  productName String?
+  brand       String?
+  quantity    String?
+  servingSize String?
+
+  categories      Json?
+  categoryTags    Json?
+  ingredientsText String?
+  nutriments      Json?
+
+  nutriScore    String?
+  novaGroup     Int?
+  ecoScore      String?
+  ecoScoreScore Float?
+
+  packagingTags Json?
+  labelsTags    Json?
+  countriesTags Json?
+
+  imageUrl String?
+
+  source         String @default("OPEN_FOOD_FACTS")
+  sourceResponse Json?
+
+  scans    ProductScan[]
+  foodLogs UserFoodLog[]
+
+  lastFetchedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([barcode])
+  @@index([source])
+}
+
+model FoodCatalogItem {
+  id String @id @default(cuid())
+
+  slug          String  @unique
+  name          String
+  description   String?
+  dietType      String?
+  servingSizeKg Float
+
+  ingredients Json
+  totalCo2eKg Float
+  confidence  CarbonEstimateConfidence @default(MEDIUM)
+  dataSources Json
+
+  isPopular Boolean @default(true)
+  isActive  Boolean @default(true)
+
+  foodLogs UserFoodLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([dietType])
+  @@index([isPopular, isActive])
+}
+
+model UserFoodLog {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  catalogItemId String?
+  catalogItem   FoodCatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: SetNull)
+
+  foodProductId String?
+  foodProduct   FoodProduct? @relation(fields: [foodProductId], references: [id], onDelete: SetNull)
+
+  activityLogId String?
+
+  mode        String
+  name        String
+  description String?
+  servings    Float   @default(1)
+  quantityKg  Float
+
+  ingredients Json
+  totalCo2eKg Float
+  confidence  CarbonEstimateConfidence @default(MEDIUM)
+  dataSources Json
+  analysis    Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([catalogItemId])
+  @@index([foodProductId])
+  @@index([activityLogId])
+}
+
+model ProductScan {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  barcode       String
+  foodProductId String?
+  foodProduct   FoodProduct? @relation(fields: [foodProductId], references: [id], onDelete: SetNull)
+
+  productName String?
+  brand       String?
+  imageUrl    String?
+
+  scanSource  String  @default("BARCODE")
+  scanContext String?
+
+  carbonEstimated Boolean @default(false)
+  activityLogId   String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([barcode])
+  @@index([scanContext])
+  @@index([createdAt])
+}
+
+model FoodCarbonFactorMapping {
+  id String @id @default(cuid())
+
+  provider         String
+  appCategory      String
+  openFoodFactsTag String?
+
+  label       String
+  description String?
+
+  climatiqActivityId  String?
+  climatiqFactorId    String?
+  climatiqDataVersion String?
+  climatiqRegion      String?
+
+  agribalyseId    String?
+  manualCo2ePerKg Float?
+
+  unitType        String @default("Weight")
+  defaultWeightKg Float?
+
+  confidence String @default("MEDIUM")
+  metadata   Json?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider])
+  @@index([appCategory])
+  @@index([openFoodFactsTag])
+  @@index([isActive])
+}
+
+model ProductLookupCache {
+  id String @id @default(cuid())
+
+  provider String @default("OPEN_FOOD_FACTS")
+  endpoint String
+  cacheKey String @unique
+
+  barcode String?
+  query   String?
+
+  sourcePayload  Json?
+  sourceResponse Json
+
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([provider])
+  @@index([endpoint])
+  @@index([barcode])
+  @@index([createdAt])
+  @@index([expiresAt])
+}
+
+model AgribalyseFoodFactor {
+  id String @id @default(cuid())
+
+  agribalyseId String?
+  ciqualCode   String?
+  foodCode     String?
+
+  name   String
+  nameFr String?
+  nameEn String?
+
+  category    String?
+  subCategory String?
+  groupName   String?
+
+  climateChangeKgCo2ePerKg Float
+
+  unit    String  @default("kg")
+  source  String  @default("AGRIBALYSE")
+  version String?
+
+  rawRow   Json?
+  metadata Json?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  foodFactorMappings FoodFactorMapping[]
+
+  @@index([agribalyseId])
+  @@index([ciqualCode])
+  @@index([foodCode])
+  @@index([name])
+  @@index([category])
+  @@index([subCategory])
+  @@index([source])
+  @@index([version])
+  @@index([isActive])
+}
+
+model FoodFactorMapping {
+  id String @id @default(cuid())
+
+  provider String @default("AGRIBALYSE")
+
+  appCategory     String
+  appActivityType String?
+
+  openFoodFactsTag      String?
+  openFoodFactsCategory String?
+
+  label       String
+  description String?
+
+  agribalyseFoodFactorId String?
+  agribalyseFoodFactor   AgribalyseFoodFactor? @relation(fields: [agribalyseFoodFactorId], references: [id], onDelete: SetNull)
+  agribalyseName         String?
+  agribalyseCode         String?
+
+  defaultQuantityKg Float?
+  confidence        CarbonEstimateConfidence @default(MEDIUM)
+
+  isActive Boolean @default(true)
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider])
+  @@index([appCategory])
+  @@index([appActivityType])
+  @@index([openFoodFactsTag])
+  @@index([agribalyseFoodFactorId])
+  @@index([isActive])
+}
+
+model AgribalyseImportJob {
+  id String @id @default(cuid())
+
+  filename String?
+  version  String?
+  source   String  @default("AGRIBALYSE")
+
+  status String
+
+  totalRows    Int @default(0)
+  validRows    Int @default(0)
+  invalidRows  Int @default(0)
+  importedRows Int @default(0)
+
+  columnMapping Json?
+  previewRows   Json?
+  errorLog      Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([version])
+  @@index([createdAt])
+}
+
+model UserGamification {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  totalXp           Int      @default(0)
+  weeklyXp          Int      @default(0)
+  level             Int      @default(1)
+  currentStreak     Int      @default(0)
+  longestStreak     Int      @default(0)
+  totalCo2eSavedKg  Float    @default(0)
+  weeklyCo2eSavedKg Float    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Friendship {
+  id          String   @id @default(cuid())
+  requesterId String
+  receiverId  String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requester   User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver    User @relation("FriendshipReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, receiverId])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  BLOCKED
+}
+
+model Mission {
+  id                    String   @id @default(cuid())
+  title                 String
+  description           String
+  category              ActivityCategory
+  missionType           MissionType
+  targetMetric          MissionTargetMetric
+  targetValue           Float
+  xpReward              Int
+  estimatedCo2eImpactKg Float?
+  startsAt              DateTime
+  endsAt                DateTime
+  isTemplate            Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  participants          MissionParticipant[]
+  invites               MissionInvite[]
+}
+
+enum MissionType {
+  WEEKLY
+  FRIEND
+  PERSONAL
+}
+
+enum MissionTargetMetric {
+  ACTIVITY_COUNT
+  CO2E_REDUCTION
+  CATEGORY_REDUCTION
+  STREAK
+}
+
+model MissionParticipant {
+  id          String   @id @default(cuid())
+  missionId   String
+  userId      String
+  progress    Float    @default(0)
+  completedAt DateTime?
+  status      MissionParticipantStatus @default(ACTIVE)
+  joinedAt    DateTime @default(now())
+
+  mission     Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([missionId, userId])
+}
+
+enum MissionParticipantStatus {
+  ACTIVE
+  COMPLETED
+  MISSED
+  LEFT
+}
+
+model MissionInvite {
+  id            String   @id @default(cuid())
+  missionId     String
+  senderId      String
+  receiverId    String?
+  receiverEmail String?
+  status        MissionInviteStatus @default(PENDING)
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  mission       Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  sender        User    @relation("MissionInviteSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver      User?   @relation("MissionInviteReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+enum MissionInviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model Goal {
+  id            String   @id @default(cuid())
+  userId        String
+  title         String
+  category      ActivityCategory
+  metric        GoalMetric
+  targetValue   Float
+  currentValue  Float    @default(0)
+  xpReward      Int
+  startsAt      DateTime
+  endsAt        DateTime
+  status        GoalStatus @default(ACTIVE)
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum GoalMetric {
+  CO2E_REDUCTION
+  ACTIVITY_COUNT
+  BUDGET_LIMIT
+  STREAK
+  CATEGORY_REDUCTION
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+  PAUSED
+}
+
+model Milestone {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  title        String
+  description  String
+  category     MilestoneCategory
+  targetMetric MilestoneTargetMetric
+  targetValue  Float
+  xpReward     Int
+  createdAt    DateTime @default(now())
+
+  unlocks      UserMilestone[]
+}
+
+model UserMilestone {
+  id          String   @id @default(cuid())
+  userId      String
+  milestoneId String
+  progress    Float    @default(0)
+  unlockedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  milestone   Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, milestoneId])
+}
+
+enum MilestoneCategory {
+  LOGGING
+  IMPACT
+  SOCIAL
+  FOOD
+  TRANSPORT
+  ENERGY
+  SHOPPING
+  WASTE
+}
+
+enum MilestoneTargetMetric {
+  TOTAL_LOGS
+  CATEGORY_LOGS
+  CO2E_SAVED
+  STREAK_DAYS
+  FRIEND_MISSIONS
+  GOALS_COMPLETED
+}
+
+model XpEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  source      XpSource
+  sourceId    String?
+  xpAmount    Int
+  reason      String
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+enum XpSource {
+  ACTIVITY_LOG
+  MISSION
+  GOAL
+  STREAK
+  MILESTONE
+  BONUS
+}
+
+model UserPreference {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  carbonUnit               String   @default("kg_co2e")
+  distanceUnit             String   @default("km")
+  leaderboardVisibility    LeaderboardVisibility @default(FRIENDS_ONLY)
+  showCityOnLeaderboard    Boolean  @default(false)
+  showCo2eSavedPublicly    Boolean  @default(true)
+  showStreakPublicly       Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum LeaderboardVisibility {
+  PUBLIC
+  LOCAL_ONLY
+  FRIENDS_ONLY
+  PRIVATE
 }
