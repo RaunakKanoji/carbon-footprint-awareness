@@ -17,7 +17,6 @@ export default function AppShell({ children }: AppShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const isCopilot = pathname === '/copilot' || pathname.startsWith('/copilot/');
-  const isOnboarding = pathname === '/onboarding' || pathname.startsWith('/onboarding/');
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-bg-base font-sans text-text-primary antialiased">
@@ -30,22 +29,18 @@ export default function AppShell({ children }: AppShellProps) {
         <AppTopbar />
 
         <main
-          className={[
-            'min-h-0 min-w-0 flex-1',
+          className={
             isCopilot
-              ? 'overflow-hidden'
-              : 'overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]',
-          ].join(' ')}
+              ? 'min-h-0 min-w-0 flex-1 overflow-hidden'
+              : 'min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto'
+          }
         >
           <div
-            className={[
-              'w-full min-h-0',
+            className={
               isCopilot
-                ? 'flex h-full flex-col p-4 pb-24 sm:p-6 md:pb-6'
-                : isOnboarding
-                  ? 'mx-auto max-w-[1320px] px-3 py-4 pb-28 sm:px-4 sm:py-5 lg:px-6'
-                  : 'mx-auto max-w-[1480px] p-4 pb-24 sm:p-6 lg:p-8',
-            ].join(' ')}
+                ? 'flex h-full w-full flex-col p-4 pb-24 sm:p-6 md:pb-6'
+                : 'mx-auto w-full max-w-[1480px] p-4 pb-24 sm:p-6 lg:p-8'
+            }
           >
             {children}
           </div>
