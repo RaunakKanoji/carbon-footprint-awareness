@@ -16,7 +16,7 @@ export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const isViewportBound = ['/copilot', '/onboarding'].some(
+  const isViewportBound = ['/copilot'].some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
@@ -32,14 +32,14 @@ export default function AppShell({ children }: AppShellProps) {
 
         <main
           className={`min-h-0 min-w-0 flex-1 ${isViewportBound
-              ? 'overflow-hidden'
-              : 'overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]'
+            ? 'overflow-hidden'
+            : 'overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]'
             }`}
         >
           <div
             className={`w-full min-h-0 ${isViewportBound
-                ? 'flex h-full flex-col p-4 pb-24 sm:p-6 md:pb-6'
-                : 'mx-auto max-w-[1480px] p-4 pb-24 sm:p-6 lg:p-8'
+              ? 'flex h-full flex-col p-4 pb-24 sm:p-6 md:pb-6'
+              : 'mx-auto max-w-[1480px] p-4 pb-24 sm:p-6 lg:p-8'
               }`}
           >
             {children}

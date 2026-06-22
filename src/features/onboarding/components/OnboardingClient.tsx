@@ -387,21 +387,19 @@ export default function OnboardingClient() {
                     onClick={() => {
                       if (item.id <= step) setStep(item.id);
                     }}
-                    className={`rounded-2xl border px-3 py-3 text-left transition-colors ${
-                      active
+                    className={`rounded-2xl border px-3 py-3 text-left transition-colors ${active
                         ? 'border-emerald-300 bg-emerald-50'
                         : done
                           ? 'border-emerald-200 bg-bg-surface'
                           : 'border-border-subtle bg-bg-surface/70 opacity-70'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                          active || done
+                        className={`flex h-8 w-8 items-center justify-center rounded-xl ${active || done
                             ? 'bg-emerald-100 text-emerald-700'
                             : 'bg-bg-elevated text-text-muted'
-                        }`}
+                          }`}
                       >
                         {done ? (
                           <CheckCircle2 className="h-4 w-4" />
