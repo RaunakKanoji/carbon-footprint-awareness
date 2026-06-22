@@ -1,10 +1,11 @@
+// app/layout.tsx
 import { ClerkProvider } from '@clerk/nextjs';
 import { ui } from '@clerk/ui';
 
 import type { Metadata } from 'next';
 
-import { ToastProvider } from '@/src/components/ui/toast-provider';
 import { QueryProvider } from '@/src/app-shell';
+import { ToastProvider } from '@/src/components/ui/toast-provider';
 import '@/src/lib/icons';
 
 import './globals.css';
@@ -31,4 +32,3 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
-

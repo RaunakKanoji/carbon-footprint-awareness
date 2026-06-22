@@ -1,5 +1,5 @@
 -- AlterEnum
-ALTER TYPE "CalculationProvider" ADD VALUE 'AGRIBALYSE';
+ALTER TYPE "CalculationProvider" ADD VALUE IF NOT EXISTS 'AGRIBALYSE';
 
 -- CreateTable
 CREATE TABLE "FoodProduct" (

@@ -112,3 +112,4 @@ data/agribalyse/*.ods
 
 # AI tool local skills and configuration (not part of the app)
 .claude/
+.vercel
