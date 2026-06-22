@@ -1,3 +1,4 @@
+// app/(app)/dashboard/page.tsx
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -79,7 +80,7 @@ export default async function DashboardPage() {
   }
 
   if (!dbUser.carbonProfile) {
-    redirect('/footprint');
+    redirect('/carbon-profile');
   }
 
   const hasBudget = await prisma.budget
@@ -97,7 +98,7 @@ export default async function DashboardPage() {
     });
 
   if (!hasBudget) {
-    redirect('/goals');
+    redirect('/carbon-budget');
   }
 
   const initialData = await getDashboardData(dbUser.id, 'week').catch((error) => {
