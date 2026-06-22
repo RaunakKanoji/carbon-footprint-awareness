@@ -1,16 +1,20 @@
-import 'server-only';
+export function requireDatabaseUrl() {
+  const databaseUrl =
+    process.env.DATABASE_URL ||
+    process.env.CARBON_POSTGRES_URL ||
+    process.env.CARBON_DATABASE_URL;
 
-export const env = {
-  databaseUrl: process.env.DATABASE_URL,
-  enableDevTools:
-    process.env.ENABLE_DEV_API_PLAYGROUND === 'true' ||
-    process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS === 'true',
-} as const;
-
-export function requireDatabaseUrl(): string {
-  if (!env.databaseUrl) {
-    throw new Error('DATABASE_URL is not defined');
+  if (!databaseUrl) {
+    throw new Error(
+      'Missing database URL. Set DATABASE_URL or CARBON_POSTGRES_URL in Vercel.',
+    );
   }
 
-  return env.databaseUrl;
+  if (databaseUrl.startsWith('prisma://') || databaseUrl.startsWith('prisma+postgres://')) {
+    throw new Error(
+      'Invalid database URL for pg adapter. Use CARBON_POSTGRES_URL or a postgresql:// connection string, not CARBON_PRISMA_DATABASE_URL.',
+    );
+  }
+
+  return databaseUrl;
 }
