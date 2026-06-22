@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
@@ -16,7 +17,9 @@ const isProtectedRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
   if (!userId && isProtectedRoute(req)) {
-    return Response.redirect(new URL('/', req.url));
+    // Use NextResponse.redirect (not Response.redirect) so Clerk can append
+    // its auth headers to the mutable response without throwing "TypeError: immutable"
+    return NextResponse.redirect(new URL('/', req.url));
   }
 });
 
