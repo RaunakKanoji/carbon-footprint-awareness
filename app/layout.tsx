@@ -1,5 +1,6 @@
 // app/layout.tsx
 import { ClerkProvider } from '@clerk/nextjs';
+import { ui } from '@clerk/ui';
 
 import type { Metadata } from 'next';
 
@@ -20,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider ui={ui}>
       <html lang="en" className="h-full antialiased">
         <body className="min-h-full flex flex-col bg-bg-base text-text-primary">
           <QueryProvider>
