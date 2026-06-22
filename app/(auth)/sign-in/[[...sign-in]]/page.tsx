@@ -50,17 +50,17 @@ export default async function SignInPage() {
                 signUpUrl="/sign-up"
                 fallbackRedirectUrl="/dashboard"
                 appearance={{
-                  layout: {
+                  options: {
                     socialButtonsPlacement: 'bottom',
                     socialButtonsVariant: 'blockButton',
                   },
                   variables: {
                     colorPrimary: '#10b981',
                     colorBackground: '#ffffff',
-                    colorText: '#111827',
-                    colorTextSecondary: '#4b5563',
-                    colorInputBackground: '#ffffff',
-                    colorInputText: '#111827',
+                    colorForeground: '#111827',
+                    colorMutedForeground: '#4b5563',
+                    colorInput: '#ffffff',
+                    colorInputForeground: '#111827',
                     fontFamily: 'inherit',
                     borderRadius: '0.5rem',
                   },
